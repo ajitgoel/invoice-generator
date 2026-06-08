@@ -407,6 +407,67 @@ function initForm() {
   if (addBtn) {
     addBtn.addEventListener("click", addItem);
   }
+
+  // Download PDF button
+  var downloadBtn = document.getElementById("downloadPdfBtn");
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", function () {
+      downloadPDF(document.getElementById("invoicePreview"));
+    });
+  }
+}
+
+// ============================================================
+// PDF Download Module
+// ============================================================
+
+/**
+ * Generates and downloads a PDF from the invoice preview element.
+ * Uses html2pdf.js (loaded from CDN). Shows a loading spinner during generation.
+ * @param {HTMLElement} element - The DOM element to capture as PDF
+ */
+function downloadPDF(element) {
+  if (!element) return;
+  if (typeof html2pdf === "undefined") {
+    alert("PDF library is still loading. Please try again in a moment.");
+    return;
+  }
+
+  var state = getInvoiceState();
+  var filename = "invoice-" + state.invoiceNumber + ".pdf";
+
+  // Show loading spinner, hide button text
+  var btnText = document.getElementById("downloadBtnText");
+  var btnSpinner = document.getElementById("downloadBtnSpinner");
+  var btn = document.getElementById("downloadPdfBtn");
+
+  if (btnText) btnText.style.display = "none";
+  if (btnSpinner) btnSpinner.className = "";
+  if (btn) btn.disabled = true;
+
+  var opt = {
+    margin: 0.5,
+    filename: filename,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+  };
+
+  html2pdf()
+    .set(opt)
+    .from(element)
+    .save()
+    .then(function () {
+      if (btnText) btnText.style.display = "";
+      if (btnSpinner) btnSpinner.className = "spinner-hidden";
+      if (btn) btn.disabled = false;
+    })
+    .catch(function () {
+      if (btnText) btnText.style.display = "";
+      if (btnSpinner) btnSpinner.className = "spinner-hidden";
+      if (btn) btn.disabled = false;
+      alert("PDF generation failed. Please try again.");
+    });
 }
 
 // Initialize form on DOM ready (browser only)

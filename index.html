@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invoice Generator</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -94,6 +95,16 @@
           <!-- Dynamically populated -->
         </div>
       </div>
+    </div>
+
+    <!-- Download PDF -->
+    <div class="download-section">
+      <button type="button" id="downloadPdfBtn" class="btn btn-primary">
+        <span id="downloadBtnText">Download PDF</span>
+        <span id="downloadBtnSpinner" class="spinner-hidden">
+          <span class="spinner"></span> Generating&hellip;
+        </span>
+      </button>
     </div>
   </div>
 

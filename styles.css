@@ -181,6 +181,53 @@ h1 {
   background: #fecaca;
 }
 
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 32px;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* Download section */
+.download-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.spinner-hidden {
+  display: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Preview Panel */
 .preview-card {
   position: sticky;
