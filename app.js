@@ -158,6 +158,103 @@ function clearStorage() {
   }
 }
 
+// ============================================================
+// Profile Persistence Module
+// ============================================================
+
+var COMPANY_PROFILE_KEY = "invoice_saved_company";
+var CUSTOMER_PROFILE_KEY = "invoice_saved_customer";
+
+// Module-level variable for the company profile logo data URL
+var _profileCompanyLogo = null;
+
+/**
+ * Saves the My Company profile from form fields to localStorage.
+ */
+function saveCompanyProfile() {
+  var profile = {
+    name: document.getElementById("profileCompanyName").value.trim(),
+    address: document.getElementById("profileCompanyAddress").value.trim(),
+    email: document.getElementById("profileCompanyEmail").value.trim(),
+    logo: _profileCompanyLogo || null,
+  };
+  try {
+    localStorage.setItem(COMPANY_PROFILE_KEY, JSON.stringify(profile));
+    showSaveConfirm("companyProfileSavedMsg");
+  } catch (e) {
+    // localStorage unavailable or full
+  }
+}
+
+/**
+ * Saves the Bill To Customer profile from form fields to localStorage.
+ */
+function saveCustomerProfile() {
+  var profile = {
+    name: document.getElementById("profileClientName").value.trim(),
+    address: document.getElementById("profileClientAddress").value.trim(),
+    email: document.getElementById("profileClientEmail").value.trim(),
+  };
+  try {
+    localStorage.setItem(CUSTOMER_PROFILE_KEY, JSON.stringify(profile));
+    showSaveConfirm("customerProfileSavedMsg");
+  } catch (e) {
+    // localStorage unavailable or full
+  }
+}
+
+/**
+ * Shows a brief confirmation message and auto-hides it.
+ * @param {string} elementId - The ID of the confirmation span
+ */
+function showSaveConfirm(elementId) {
+  var el = document.getElementById(elementId);
+  if (!el) return;
+  el.style.display = "inline-block";
+  // Restart animation by removing and re-adding the element trigger
+  el.style.animation = "none";
+  el.offsetHeight; // force reflow
+  el.style.animation = "";
+  // Hide after animation completes (2s)
+  setTimeout(function () {
+    el.style.display = "none";
+  }, 2000);
+}
+
+/**
+ * Loads the My Company profile from localStorage and populates the form.
+ */
+function loadCompanyProfile() {
+  try {
+    var raw = localStorage.getItem(COMPANY_PROFILE_KEY);
+    if (!raw) return;
+    var profile = JSON.parse(raw);
+    if (profile.name !== undefined) setFieldValue("profileCompanyName", profile.name);
+    if (profile.address !== undefined) setFieldValue("profileCompanyAddress", profile.address);
+    if (profile.email !== undefined) setFieldValue("profileCompanyEmail", profile.email);
+    _profileCompanyLogo = profile.logo || null;
+    renderProfileCompanyLogo();
+  } catch (e) {
+    // silently ignore parse errors
+  }
+}
+
+/**
+ * Loads the Bill To Customer profile from localStorage and populates the form.
+ */
+function loadCustomerProfile() {
+  try {
+    var raw = localStorage.getItem(CUSTOMER_PROFILE_KEY);
+    if (!raw) return;
+    var profile = JSON.parse(raw);
+    if (profile.name !== undefined) setFieldValue("profileClientName", profile.name);
+    if (profile.address !== undefined) setFieldValue("profileClientAddress", profile.address);
+    if (profile.email !== undefined) setFieldValue("profileClientEmail", profile.email);
+  } catch (e) {
+    // silently ignore parse errors
+  }
+}
+
 /**
  * Helper: auto-save current state to localStorage.
  * Called on every state mutation.
@@ -289,6 +386,70 @@ function renderLogoThumbnail() {
     uploadArea.classList.add("has-logo");
   } else {
     // Show upload prompt only
+    if (preview) {
+      preview.src = "";
+      preview.style.display = "none";
+    }
+    if (removeBtn) removeBtn.style.display = "none";
+    uploadArea.classList.remove("has-logo");
+  }
+}
+
+// ============================================================
+// Profile Company Logo Upload Module
+// ============================================================
+
+/**
+ * Reads an image file and stores it as the profile company logo.
+ * @param {File} file - The selected image file
+ */
+function handleProfileCompanyLogoFile(file) {
+  if (!file) return;
+
+  var validTypes = ["image/png", "image/jpeg", "image/webp"];
+  if (validTypes.indexOf(file.type) === -1) {
+    alert("Please select a PNG, JPG, or WebP image.");
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var dataUrl = e.target.result;
+    if (isLogoSizeLarge(dataUrl)) {
+      alert("Warning: Logo is over 500KB. Large images may cause slow page loads.");
+    }
+    _profileCompanyLogo = dataUrl;
+    renderProfileCompanyLogo();
+  };
+  reader.readAsDataURL(file);
+}
+
+/**
+ * Removes the profile company logo.
+ */
+function removeProfileCompanyLogo() {
+  _profileCompanyLogo = null;
+  renderProfileCompanyLogo();
+}
+
+/**
+ * Renders the profile company logo thumbnail and controls.
+ */
+function renderProfileCompanyLogo() {
+  var preview = document.getElementById("profileCompanyLogoPreview");
+  var uploadArea = document.getElementById("profileCompanyLogoArea");
+  var removeBtn = document.getElementById("profileCompanyRemoveLogoBtn");
+
+  if (!uploadArea) return;
+
+  if (_profileCompanyLogo) {
+    if (preview) {
+      preview.src = _profileCompanyLogo;
+      preview.style.display = "";
+    }
+    if (removeBtn) removeBtn.style.display = "";
+    uploadArea.classList.add("has-logo");
+  } else {
     if (preview) {
       preview.src = "";
       preview.style.display = "none";
@@ -753,7 +914,97 @@ function downloadPDF(element) {
     });
 }
 
+// ============================================================
+// Tab Navigation Module
+// ============================================================
+
+/**
+ * Initializes tab switching behavior.
+ * Clicking a tab activates the corresponding view container.
+ */
+function initTabs() {
+  var tabs = document.querySelectorAll(".tab");
+  var views = document.querySelectorAll(".view-container");
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      var targetId = "view-" + tab.dataset.tab;
+
+      // Update active tab
+      tabs.forEach(function (t) {
+        t.classList.remove("active");
+      });
+      tab.classList.add("active");
+
+      // Show target view, hide others
+      views.forEach(function (v) {
+        v.classList.remove("active");
+      });
+      var target = document.getElementById(targetId);
+      if (target) {
+        target.classList.add("active");
+      }
+    });
+  });
+}
+
+// ============================================================
+// Profile Forms Initialization
+// ============================================================
+
+/**
+ * Wires up profile form elements: save buttons, logo input, and loads
+ * saved profile data from localStorage on DOM ready.
+ */
+function initProfileForms() {
+  // --- My Company Profile ---
+
+  // Load saved company profile
+  loadCompanyProfile();
+
+  // Save button
+  var saveCompanyBtn = document.getElementById("saveCompanyProfileBtn");
+  if (saveCompanyBtn) {
+    saveCompanyBtn.addEventListener("click", saveCompanyProfile);
+  }
+
+  // Logo file input
+  var profileLogoInput = document.getElementById("profileCompanyLogoInput");
+  if (profileLogoInput) {
+    profileLogoInput.addEventListener("change", function (e) {
+      if (e.target.files && e.target.files[0]) {
+        handleProfileCompanyLogoFile(e.target.files[0]);
+        e.target.value = "";
+      }
+    });
+  }
+
+  // Remove logo button
+  var profileRemoveLogoBtn = document.getElementById("profileCompanyRemoveLogoBtn");
+  if (profileRemoveLogoBtn) {
+    profileRemoveLogoBtn.addEventListener("click", removeProfileCompanyLogo);
+  }
+
+  // --- Bill To Customer Profile ---
+
+  // Load saved customer profile
+  loadCustomerProfile();
+
+  // Save button
+  var saveCustomerBtn = document.getElementById("saveCustomerProfileBtn");
+  if (saveCustomerBtn) {
+    saveCustomerBtn.addEventListener("click", saveCustomerProfile);
+  }
+
+  // --- Products Tab ---
+  // Placeholder — full implementation in issue 09
+}
+
 // Initialize form on DOM ready (browser only)
 if (typeof document !== "undefined") {
-  document.addEventListener("DOMContentLoaded", initForm);
+  document.addEventListener("DOMContentLoaded", function () {
+    initForm();
+    initTabs();
+    initProfileForms();
+  });
 }

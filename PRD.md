@@ -10,6 +10,7 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 
 ## User Stories
 
+### Core Invoice Generation Stories
 1. As a freelancer, I want to enter my company name, address, email, and logo, so that my invoices look professional.
 2. As a freelancer, I want to enter my client's name, address, and email, so the invoice is properly addressed.
 3. As a freelancer, I want to add multiple line items with description, quantity, and unit price, so I can bill for all work performed.
@@ -27,6 +28,62 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 15. As a freelancer, I want a responsive layout that works on mobile, so I can create invoices from my phone.
 16. As a freelancer, I want to upload my company logo, so my branding appears on the invoice.
 
+### Profile Library & Saved Data Stories (Added in v1.1)
+
+#### US-017: Manage My Company profile in a separate tab
+**Description:** As a freelancer, I want a dedicated tab to save my company information (name, address, email, logo) so that I can reuse it across multiple invoices without re-typing.
+
+**Acceptance Criteria:**
+- [ ] Tab bar added to the top of the interface: "Invoice Generator", "My Company", "Bill To Customer", and "Products".
+- [ ] Selecting "My Company" hides other views and shows a form with fields for Company Name, Address, Email, and Logo upload.
+- [ ] Saving company profile persists the data to `localStorage` under `invoice_saved_company`.
+- [ ] If saved company data exists, it is loaded automatically when loading the page and the tab.
+- [ ] Typecheck/lint passes.
+- [ ] Verify in browser using dev-browser skill.
+
+#### US-018: Manage Bill To Customer profile in a separate tab
+**Description:** As a freelancer, I want a dedicated tab to save a single customer's information (client name, address, email) so I can quickly load them on my invoices.
+
+**Acceptance Criteria:**
+- [ ] Selecting the "Bill To Customer" tab hides other views and shows a form with fields for Client Name, Address, and Email.
+- [ ] Saving the profile persists the data to `localStorage` under `invoice_saved_customer`.
+- [ ] If saved customer data exists, it is loaded automatically when loading the page and the tab.
+- [ ] Typecheck/lint passes.
+- [ ] Verify in browser using dev-browser skill.
+
+#### US-019: Manage Products and Prices list in a separate tab
+**Description:** As a freelancer, I want a dedicated tab to manage a list of products/services and their prices.
+
+**Acceptance Criteria:**
+- [ ] Selecting the "Products" tab displays a list of currently saved products/services and a form to add a new product (Name/Description, Unit Price).
+- [ ] Each item in the list has a "Delete" button that removes it from the catalog.
+- [ ] Products catalog is persisted in `localStorage` under `invoice_saved_products`.
+- [ ] Validation ensures product names are not blank and prices are valid non-negative numbers.
+- [ ] Typecheck/lint passes.
+- [ ] Verify in browser using dev-browser skill.
+
+#### US-020: Auto-populate Company & Customer Details via Suggestions
+**Description:** As a freelancer, I want to auto-populate the Invoice Generator form fields using suggestions from my saved company and customer profiles.
+
+**Acceptance Criteria:**
+- [ ] In the Invoice Generator tab, focusing the "Company Name" input displays a suggestion dropdown showing the saved company profile (if set).
+- [ ] Selecting the suggestion auto-populates Company Name, Address, Email, and Logo.
+- [ ] Focusing the "Client Name" input displays a suggestion dropdown showing the saved customer profile (if set).
+- [ ] Selecting the suggestion auto-populates Client Name, Address, and Email.
+- [ ] Standard typing override remains available.
+- [ ] Typecheck/lint passes.
+- [ ] Verify in browser using dev-browser skill.
+
+#### US-021: Add Saved Product as Line Item in Invoice
+**Description:** As a freelancer, I want to quickly add line items to the invoice using autocomplete/suggestions from my saved products catalog.
+
+**Acceptance Criteria:**
+- [ ] In the Invoice Generator tab, under the "Line Items" section, add a product dropdown or auto-suggest input to select from saved products.
+- [ ] Selecting a saved product adds a new row to the line items table with description and price pre-filled.
+- [ ] Handled correctly even when multiple items are appended.
+- [ ] Typecheck/lint passes.
+- [ ] Verify in browser using dev-browser skill.
+
 ## Implementation Decisions
 
 ### Architecture
@@ -34,7 +91,11 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 - **Fully client-side static site**: No server, no database, no build step. Single HTML file (or HTML + CSS + JS files) served from Cloudflare Pages.
 - **No framework**: Vanilla HTML, CSS, and JavaScript. Zero npm dependencies at build time.
 - **html2pdf.js for PDF generation**: Loaded from CDN. Converts the invoice preview DOM node to PDF using html2canvas + jsPDF. To avoid height collapse and scroll position clipping, the target is statically cloned inside a temporary absolute-positioned wrapper at the top of the body, and html2canvas scroll offsets are reset (`scrollX: 0, scrollY: 0`).
-- **localStorage persistence**: Form state auto-saves on every change. Restored on page load. One "Reset All" button clears saved data.
+- **localStorage persistence**:
+  - Invoice session state autosaves under `invoiceGeneratorState` on changes.
+  - Saved company profile saved under `invoice_saved_company`.
+  - Saved customer profile saved under `invoice_saved_customer`.
+  - Saved products list saved under `invoice_saved_products` (JSON array).
 - **AdSense placement**: Single banner ad below the invoice generation area (after the "Download PDF" button). Non-intrusive, doesn't compete with form input space.
 
 ### Major Modules
@@ -42,17 +103,22 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 1. **Invoice state module** (`app.js`) — Central state object holding all invoice data. Pure functions for calculations (subtotal, tax, total). Interface: `getInvoiceState()`, `updateInvoiceField(path, value)`, `calculateTotals(state)`, `resetInvoice()`.
 2. **Invoice rendering module** (`app.js`) — Renders the live preview from state. Called on every state change. Interface: `renderPreview(state)`.
 3. **PDF generation module** (`app.js`) — Thin wrapper around html2pdf.js. Interface: `downloadPDF(element)`.
-4. **Persistence module** (`app.js`) — localStorage save/load/clear. Interface: `saveToStorage(state)`, `loadFromStorage()`, `clearStorage()`.
+4. **Persistence module** (`app.js`) — localStorage save/load/clear. Interface: `saveToStorage(state)`, `loadFromStorage()`, `clearStorage()`. Also handles management of saved company, client, and product profiles.
+5. **Navigation module** (`app.js`) — Manages tab rendering, active tab states, and hiding/showing pages.
+6. **Autocomplete suggestion module** (`app.js`) — Handles displaying autocomplete suggestion lists for Company Name, Client Name, and Product selection in the invoice generator form.
 
 ### Data Flow
 
 ```
-User Input → state update → re-render preview → auto-save to localStorage
-                                              → [Download PDF] → html2pdf captures preview DOM → save as file
+Tab Navigation Click → Toggle Visibility of views
+Saved Profile Update → Write to localStorage
+User Typing/Selecting Suggestion → state update → re-render preview → auto-save to localStorage
+                                                → [Download PDF] → html2pdf captures preview DOM → save as file
 ```
 
 ### State Shape
 
+#### Current Invoice State
 ```js
 {
   invoiceNumber: "001",
@@ -66,6 +132,11 @@ User Input → state update → re-render preview → auto-save to localStorage
 }
 ```
 
+#### Saved Data State (in localStorage)
+- Key `invoice_saved_company`: `{ name: "", address: "", email: "", logo: null }`
+- Key `invoice_saved_customer`: `{ name: "", address: "", email: "" }`
+- Key `invoice_saved_products`: `[{ id: "uuid-or-timestamp", description: "", unitPrice: 0 }]`
+
 ### Visual Design
 
 - Clean, professional aesthetic inspired by Stripe's design language.
@@ -74,25 +145,33 @@ User Input → state update → re-render preview → auto-save to localStorage
 - System font stack, generous whitespace, subtle borders/shadows.
 - Print-friendly CSS for the preview panel.
 - AdSense banner ad below both columns, full width.
+- **Tab Layout**:
+  - Global navigation tab bar at the top with options: "Invoice Generator", "My Company", "Bill To Customer", "Products".
+  - Sleek modern layout where the active tab is visually highlighted (using harmonized color scheme like custom HSL colors, no generic gray/blue).
+- **Suggestions UX**:
+  - Non-intrusive floating suggestion boxes below input fields when focused.
+  - Dropdown options can be navigated with mouse/touch or dismissed.
 
 ## Testing Decisions
 
-- **What makes a good test**: Test the calculation logic (subtotal, tax, total) as pure functions. Test that state updates correctly propagate. Do not test DOM rendering or PDF generation — those are browser/CDN concerns.
-- **What will be tested**: Invoice calculation functions (`calculateSubtotal`, `calculateTax`, `calculateTotal`) as unit tests. State initialization and reset behavior.
+- **What makes a good test**: Test the calculation logic (subtotal, tax, total) as pure functions. Test that state updates correctly propagate. Test the localStorage load/save helpers. Do not test DOM rendering or PDF generation — those are browser/CDN concerns.
+- **What will be tested**: Invoice calculation functions (`calculateSubtotal`, `calculateTax`, `calculateTotal`) as unit tests. Saved profile persistence getters and setters.
 - **Testing tools**: Vanilla JS test assertions — a simple test runner or QUnit-style inline tests, since there are no npm dependencies.
 
 ## Out of Scope
 
 - Multi-currency support
 - Discounts or adjustments
-- Invoice history / dashboard / list of past invoices
+- Invoice history / dashboard / list of past invoices (only active invoice state)
 - Email sending from the app
-- Backend or database of any kind
+- Backend or database of any kind (pure browser local storage only)
 - User accounts or authentication
 - Multi-language / i18n support
 - Recurring invoices / subscriptions
 - Time tracking
 - Expense tracking
+- Multiple saved company profiles (only a single saved company profile is supported)
+- Multiple saved customer profiles (only a single saved customer profile is supported)
 
 ## Further Notes
 

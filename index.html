@@ -9,8 +9,16 @@
 </head>
 <body>
   <div class="container">
-    <h1>Invoice Generator</h1>
+    <!-- Global Tab Navigation -->
+    <nav class="tab-bar">
+      <button class="tab active" data-tab="invoice">Invoice Generator</button>
+      <button class="tab" data-tab="company">My Company</button>
+      <button class="tab" data-tab="customer">Bill To Customer</button>
+      <button class="tab" data-tab="products">Products</button>
+    </nav>
 
+    <!-- Invoice Generator View -->
+    <div id="view-invoice" class="view-container active">
     <div class="layout">
       <!-- Form Column -->
       <div class="form-column">
@@ -126,6 +134,79 @@
       </button>
       <button type="button" id="resetAllBtn" class="btn btn-reset">Reset All</button>
     </div>
+    </div><!-- /#view-invoice -->
+
+    <!-- My Company Profile View -->
+    <div id="view-company" class="view-container">
+      <div class="card profile-card">
+        <h2>My Company Profile</h2>
+        <p class="profile-desc">Save your company details to reuse across invoices.</p>
+        <section class="form-section">
+          <div class="form-group">
+            <label for="profileCompanyName">Company Name</label>
+            <input type="text" id="profileCompanyName" placeholder="Acme Inc.">
+          </div>
+          <div class="form-group">
+            <label for="profileCompanyAddress">Address</label>
+            <input type="text" id="profileCompanyAddress" placeholder="123 Business St, City, State ZIP">
+          </div>
+          <div class="form-group">
+            <label for="profileCompanyEmail">Email</label>
+            <input type="email" id="profileCompanyEmail" placeholder="billing@acme.com">
+          </div>
+          <div class="form-group">
+            <label>Company Logo</label>
+            <div class="logo-upload-area" id="profileCompanyLogoArea">
+              <img id="profileCompanyLogoPreview" class="logo-thumb" src="" alt="Logo preview" style="display:none">
+              <div class="logo-upload-prompt">
+                <label for="profileCompanyLogoInput" class="btn btn-secondary logo-upload-btn">Choose Logo</label>
+                <span class="logo-formats">PNG, JPG, or WebP</span>
+              </div>
+              <button type="button" id="profileCompanyRemoveLogoBtn" class="btn btn-remove-logo" style="display:none">Remove Logo</button>
+              <input type="file" id="profileCompanyLogoInput" accept="image/png,image/jpeg,image/webp" class="logo-file-input">
+            </div>
+          </div>
+        </section>
+        <button type="button" id="saveCompanyProfileBtn" class="btn btn-primary">Save Profile</button>
+        <span id="companyProfileSavedMsg" class="save-confirm" style="display:none">&#10003; Profile saved</span>
+      </div>
+    </div><!-- /#view-company -->
+
+    <!-- Bill To Customer Profile View -->
+    <div id="view-customer" class="view-container">
+      <div class="card profile-card">
+        <h2>Bill To Customer Profile</h2>
+        <p class="profile-desc">Save your customer's details to reuse across invoices.</p>
+        <section class="form-section">
+          <div class="form-group">
+            <label for="profileClientName">Client Name</label>
+            <input type="text" id="profileClientName" placeholder="Client Company">
+          </div>
+          <div class="form-group">
+            <label for="profileClientAddress">Client Address</label>
+            <input type="text" id="profileClientAddress" placeholder="456 Client Ave, City, State ZIP">
+          </div>
+          <div class="form-group">
+            <label for="profileClientEmail">Client Email</label>
+            <input type="email" id="profileClientEmail" placeholder="accounts@client.com">
+          </div>
+        </section>
+        <button type="button" id="saveCustomerProfileBtn" class="btn btn-primary">Save Profile</button>
+        <span id="customerProfileSavedMsg" class="save-confirm" style="display:none">&#10003; Profile saved</span>
+      </div>
+    </div><!-- /#view-customer -->
+
+    <!-- Products Catalog View -->
+    <div id="view-products" class="view-container">
+      <div class="card profile-card">
+        <h2>Products &amp; Services</h2>
+        <p class="profile-desc">Manage your products and services catalog for quick line-item selection.</p>
+        <div class="placeholder-content">
+          <p>Products catalog coming soon.</p>
+        </div>
+      </div>
+    </div><!-- /#view-products -->
+
   </div>
 
   <script src="app.js"></script>

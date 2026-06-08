@@ -30,12 +30,15 @@ create_issue() {
 }
 
 # Create in dependency order
-create_issue "$ISSUES_DIR/01-invoice-form-and-state.md"
-create_issue "$ISSUES_DIR/02-invoice-preview-panel.md"
-create_issue "$ISSUES_DIR/03-pdf-download.md"
-create_issue "$ISSUES_DIR/04-localstorage-persistence.md"
-create_issue "$ISSUES_DIR/05-company-logo-upload.md"
-create_issue "$ISSUES_DIR/06-polish-css-styling.md"
-create_issue "$ISSUES_DIR/07-calculation-tests.md"
+create_issue "$ISSUES_DIR/done/01-invoice-form-and-state.md"
+create_issue "$ISSUES_DIR/done/02-invoice-preview-panel.md"
+create_issue "$ISSUES_DIR/done/03-pdf-download.md"
+create_issue "$ISSUES_DIR/done/04-localstorage-persistence.md"
+create_issue "$ISSUES_DIR/done/05-company-logo-upload.md"
+create_issue "$ISSUES_DIR/done/06-polish-css-styling.md"
+create_issue "$ISSUES_DIR/done/07-calculation-tests.md"
+create_issue "$ISSUES_DIR/08-tab-navigation-and-profiles.md"
+create_issue "$ISSUES_DIR/09-products-catalog.md"
+create_issue "$ISSUES_DIR/10-autocomplete-and-population.md"
 
 echo "All issues created!"
