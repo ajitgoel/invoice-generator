@@ -33,7 +33,7 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 
 - **Fully client-side static site**: No server, no database, no build step. Single HTML file (or HTML + CSS + JS files) served from Cloudflare Pages.
 - **No framework**: Vanilla HTML, CSS, and JavaScript. Zero npm dependencies at build time.
-- **html2pdf.js for PDF generation**: Loaded from CDN. Converts the invoice preview DOM node directly to PDF using html2canvas + jsPDF. This ensures the PDF matches the preview exactly.
+- **html2pdf.js for PDF generation**: Loaded from CDN. Converts the invoice preview DOM node to PDF using html2canvas + jsPDF. To avoid height collapse and scroll position clipping, the target is statically cloned inside a temporary absolute-positioned wrapper at the top of the body, and html2canvas scroll offsets are reset (`scrollX: 0, scrollY: 0`).
 - **localStorage persistence**: Form state auto-saves on every change. Restored on page load. One "Reset All" button clears saved data.
 - **AdSense placement**: Single banner ad below the invoice generation area (after the "Download PDF" button). Non-intrusive, doesn't compete with form input space.
 

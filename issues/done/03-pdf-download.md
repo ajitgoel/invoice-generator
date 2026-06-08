@@ -16,13 +16,18 @@ The `downloadPDF(element)` function in `app.js` calls `html2pdf().from(element).
 Add a "Download PDF" button below the form. Show a brief loading state while PDF generates.
 
 ## Acceptance criteria
+ 
+- [x] Clicking "Download PDF" generates a PDF matching the preview
+- [x] PDF filename includes the invoice number
+- [x] PDF is print-friendly with proper margins
+- [x] Loading indicator shows during generation
+- [x] Works on mobile browsers
+ 
+## Implementation Details
 
-- [ ] Clicking "Download PDF" generates a PDF matching the preview
-- [ ] PDF filename includes the invoice number
-- [ ] PDF is print-friendly with proper margins
-- [ ] Loading indicator shows during generation
-- [ ] Works on mobile browsers
+- **Viewport Scroll Reset**: Sets `scrollX: 0, scrollY: 0` in `html2canvas` options to prevent clipping or blank output when downloading while scrolled down.
+- **Rendering Clone Layout**: Clones the preview statically (`position: static`) inside an absolute-positioned wrapper (`position: absolute; left: 0; top: 0;`) appended to `document.body`, and passes the static `clone` to `html2pdf()`. This ensures the temporary container does not collapse to `0` height.
 
 ## Blocked by
-
+ 
 - #2 (or: 02-invoice-preview-panel.md)
