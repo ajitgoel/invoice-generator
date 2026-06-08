@@ -817,6 +817,22 @@ function formatDate(isoStr) {
 }
 
 /**
+ * Converts a string into a filename-safe slug.
+ * Lowercases, replaces non-alphanumeric characters with hyphens,
+ * collapses consecutive hyphens, and trims leading/trailing hyphens.
+ * @param {string} str - The input string to slugify
+ * @returns {string} Filename-safe slug, or empty string if input is empty
+ */
+function slugifyForFilename(str) {
+  if (!str || typeof str !== "string") return "";
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
  * Returns a value if truthy, otherwise a dash placeholder.
  */
 function dashIfEmpty(val) {
@@ -838,12 +854,14 @@ function renderPreview() {
   html += '<div class="inv-header">';
   html += '<div class="inv-company">';
 
-  // Logo
+  // Logo — centered above company name
   if (state.company.logo) {
     html +=
+      '<div class="inv-logo-wrapper">' +
       '<img src="' +
       state.company.logo +
-      '" alt="Company Logo" class="inv-logo">';
+      '" alt="Company Logo" class="inv-logo">' +
+      "</div>";
   }
 
   html +=
@@ -1088,7 +1106,9 @@ function downloadPDF(element) {
   }
 
   var state = getInvoiceState();
-  var filename = "invoice-" + state.invoiceNumber + ".pdf";
+  var customerSlug = slugifyForFilename(state.client.name) || "client";
+  var dateSlug = (state.date || "").replace(/-/g, "");
+  var filename = customerSlug + "-invoice-" + dateSlug + "-" + state.invoiceNumber + ".pdf";
 
   // Show loading spinner, hide button text
   var btnText = document.getElementById("downloadBtnText");

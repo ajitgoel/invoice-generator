@@ -186,12 +186,19 @@ h1 {
 }
 
 /* Logo in invoice preview */
+.inv-logo-wrapper {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
 .inv-logo {
-  max-width: 120px;
-  max-height: 64px;
+  max-width: 200px;
+  max-height: 80px;
+  width: auto;
+  height: auto;
   object-fit: contain;
-  margin-bottom: 8px;
-  display: block;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* Line Items */
