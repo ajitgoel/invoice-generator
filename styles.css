@@ -691,6 +691,28 @@ h1 {
   background: hsl(0, 84%, 85%);
 }
 
+.btn-edit-customer {
+  background: hsl(217, 91%, 92%);
+  color: hsl(221, 83%, 40%);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+  margin-right: 6px;
+}
+
+.btn-edit-customer:hover {
+  background: hsl(217, 88%, 86%);
+}
+
+.customer-actions-cell {
+  white-space: nowrap;
+}
+
 /* Validation error styling */
 .field-error {
   display: inline-block;

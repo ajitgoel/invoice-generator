@@ -171,6 +171,9 @@ var _profileCompanyLogo = null;
 // Module-level customers array — loaded from localStorage on init
 var _customers = [];
 
+// Tracks which customer ID is being edited in the Bill To form (null = add mode)
+var _editingCustomerId = null;
+
 /**
  * Saves the My Company profile from form fields to localStorage.
  */
@@ -295,6 +298,50 @@ function deleteCustomer(id) {
   });
   saveCustomers();
   renderCustomersList();
+  // If we were editing the deleted customer, reset
+  if (_editingCustomerId === id) {
+    cancelEditCustomer();
+  }
+}
+
+/**
+ * Loads a customer into the form for editing.
+ * @param {string} id - The customer ID to edit
+ */
+function startEditCustomer(id) {
+  for (var i = 0; i < _customers.length; i++) {
+    if (_customers[i].id === id) {
+      _editingCustomerId = id;
+      setFieldValue("profileClientName", _customers[i].name);
+      setFieldValue("profileClientAddress", _customers[i].address);
+      setFieldValue("profileClientEmail", _customers[i].email);
+      var addBtn = document.getElementById("addCustomerBtn");
+      var cancelBtn = document.getElementById("cancelEditCustomerBtn");
+      if (addBtn) addBtn.textContent = "Update Customer";
+      if (cancelBtn) cancelBtn.style.display = "";
+      // Scroll to top of form
+      var card = document.querySelector("#view-customer .profile-card");
+      if (card) card.scrollIntoView({ behavior: "smooth" });
+      break;
+    }
+  }
+}
+
+/**
+ * Exits edit mode, clears the customer form, and resets buttons.
+ */
+function cancelEditCustomer() {
+  _editingCustomerId = null;
+  setFieldValue("profileClientName", "");
+  setFieldValue("profileClientAddress", "");
+  setFieldValue("profileClientEmail", "");
+  var addBtn = document.getElementById("addCustomerBtn");
+  var cancelBtn = document.getElementById("cancelEditCustomerBtn");
+  if (addBtn) addBtn.textContent = "Add Customer";
+  if (cancelBtn) cancelBtn.style.display = "none";
+  // Hide any lingering error
+  var errEl = document.getElementById("customerErrorMsg");
+  if (errEl) errEl.style.display = "none";
 }
 
 /**
@@ -330,9 +377,14 @@ function renderCustomersList() {
         "<td>" +
         escapeHtml(customer.email) +
         "</td>" +
-        '<td><button type="button" class="btn-delete-product" data-customer-id="' +
+        '<td class="customer-actions-cell">' +
+        '<button type="button" class="btn-edit-customer" data-customer-id="' +
         customer.id +
-        '">Delete</button></td>';
+        '">Edit</button>' +
+        '<button type="button" class="btn-delete-product" data-customer-id="' +
+        customer.id +
+        '">Delete</button>' +
+        "</td>";
 
       tbody.appendChild(row);
     }
@@ -344,6 +396,23 @@ function renderCustomersList() {
  */
 function showCustomerAddedConfirm() {
   var el = document.getElementById("customerAddedMsg");
+  if (!el) return;
+  var errEl = document.getElementById("customerErrorMsg");
+  if (errEl) errEl.style.display = "none";
+  el.style.display = "inline-block";
+  el.style.animation = "none";
+  el.offsetHeight;
+  el.style.animation = "";
+  setTimeout(function () {
+    el.style.display = "none";
+  }, 2000);
+}
+
+/**
+ * Shows a brief confirmation when a customer is updated.
+ */
+function showCustomerUpdatedConfirm() {
+  var el = document.getElementById("customerUpdatedMsg");
   if (!el) return;
   var errEl = document.getElementById("customerErrorMsg");
   if (errEl) errEl.style.display = "none";
@@ -1626,26 +1695,59 @@ function initProfileForms() {
   loadCustomers();
   renderCustomersList();
 
-  // Add Customer button
+  // Add / Update Customer button
   var addCustomerBtn = document.getElementById("addCustomerBtn");
   if (addCustomerBtn) {
     addCustomerBtn.addEventListener("click", function () {
       var nameInput = document.getElementById("profileClientName");
       var addressInput = document.getElementById("profileClientAddress");
       var emailInput = document.getElementById("profileClientEmail");
-      if (nameInput && addressInput && emailInput) {
-        addCustomer(nameInput.value, addressInput.value, emailInput.value);
+      if (!nameInput || !addressInput || !emailInput) return;
+
+      var name = nameInput.value;
+      var address = addressInput.value;
+      var email = emailInput.value;
+
+      if (_editingCustomerId) {
+        // Update existing customer
+        var error = validateCustomer(name);
+        if (error) {
+          showCustomerError(error);
+          return;
+        }
+        for (var ci = 0; ci < _customers.length; ci++) {
+          if (_customers[ci].id === _editingCustomerId) {
+            _customers[ci].name = name.trim();
+            _customers[ci].address = (address || "").trim();
+            _customers[ci].email = (email || "").trim();
+            break;
+          }
+        }
+        saveCustomers();
+        renderCustomersList();
+        showCustomerUpdatedConfirm();
+        cancelEditCustomer();
+      } else {
+        addCustomer(name, address, email);
       }
     });
   }
 
-  // Delegate clicks on the customers table body for delete buttons
+  // Cancel Edit Customer button
+  var cancelEditBtn = document.getElementById("cancelEditCustomerBtn");
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener("click", cancelEditCustomer);
+  }
+
+  // Delegate clicks on the customers table body for edit and delete buttons
   var customersTbody = document.getElementById("customersTableBody");
   if (customersTbody) {
     customersTbody.addEventListener("click", function (e) {
       var target = e.target;
       if (target.classList.contains("btn-delete-product") && target.dataset.customerId) {
         deleteCustomer(target.dataset.customerId);
+      } else if (target.classList.contains("btn-edit-customer") && target.dataset.customerId) {
+        startEditCustomer(target.dataset.customerId);
       }
     });
   }

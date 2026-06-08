@@ -85,6 +85,18 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 - [ ] Typecheck/lint passes.
 - [ ] Verify in browser using dev-browser skill.
 
+#### US-022: Bulk import products via CSV file
+**Description:** As a freelancer with an existing list of products and pricing, I want to upload a CSV file in the Products tab to import multiple items at once.
+
+**Acceptance Criteria:**
+- [ ] An "Import Products" section is added to the Products tab, featuring a file selector accepting `.csv` files.
+- [ ] Displays instructions detailing the expected format: a two-column CSV with columns representing `Description` and `Unit Price`.
+- [ ] Validates imported rows (requires description and non-negative price), skipping invalid entries.
+- [ ] Merges newly imported products into the existing catalog in `localStorage.invoice_saved_products`.
+- [ ] Displays a success banner showing the count of successfully imported products and any skipped invalid rows.
+- [ ] Typecheck/lint passes.
+- [ ] Verify in browser using dev-browser skill.
+
 ## Implementation Decisions
 
 ### Architecture

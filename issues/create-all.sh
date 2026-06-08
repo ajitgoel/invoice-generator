@@ -42,5 +42,6 @@ create_issue "$ISSUES_DIR/done/09-products-catalog.md"
 create_issue "$ISSUES_DIR/done/10-autocomplete-and-population.md"
 create_issue "$ISSUES_DIR/11-multiple-customer-profiles.md"
 create_issue "$ISSUES_DIR/12-customer-autocomplete-selection.md"
+create_issue "$ISSUES_DIR/13-csv-product-import.md"
 
 echo "All issues created!"
