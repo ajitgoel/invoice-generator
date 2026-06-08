@@ -205,6 +205,100 @@ function updateInvoiceField(path, value) {
 }
 
 // ============================================================
+// Logo Upload Module
+// ============================================================
+
+/**
+ * Pure function: checks whether a data URL exceeds the recommended 500KB limit.
+ * Data URLs are base64-encoded, so string length is a close proxy for binary size.
+ * @param {string|null} dataUrl - The data URL to check
+ * @returns {boolean} True if the data URL exceeds 500KB
+ */
+function isLogoSizeLarge(dataUrl) {
+  if (!dataUrl) return false;
+  // 500KB = 512000 bytes. Base64 adds ~33% overhead, but string length is
+  // a reasonable proxy that errs on the side of warning too early.
+  return dataUrl.length > 512000;
+}
+
+/**
+ * Reads an image file via FileReader and sets it as the company logo.
+ * Validates file type (PNG, JPG, WebP) and warns on large files.
+ * @param {File} file - The selected image file
+ */
+function handleLogoFile(file) {
+  if (!file) return;
+
+  // Validate file type
+  var validTypes = ["image/png", "image/jpeg", "image/webp"];
+  if (validTypes.indexOf(file.type) === -1) {
+    alert("Please select a PNG, JPG, or WebP image.");
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var dataUrl = e.target.result;
+    if (isLogoSizeLarge(dataUrl)) {
+      alert("Warning: Logo is over 500KB. Large images may cause slow page loads.");
+    }
+    setCompanyLogo(dataUrl);
+  };
+  reader.readAsDataURL(file);
+}
+
+/**
+ * Sets the company logo data URL in state and updates the UI.
+ * @param {string} dataUrl - Base64 data URL of the logo image
+ */
+function setCompanyLogo(dataUrl) {
+  updateInvoiceField("company.logo", dataUrl);
+  renderLogoThumbnail();
+  renderPreview();
+  autoSave();
+}
+
+/**
+ * Removes the company logo from state and updates the UI.
+ */
+function removeCompanyLogo() {
+  updateInvoiceField("company.logo", null);
+  renderLogoThumbnail();
+  renderPreview();
+  autoSave();
+}
+
+/**
+ * Renders the logo thumbnail and remove button in the form.
+ */
+function renderLogoThumbnail() {
+  var state = getInvoiceState();
+  var preview = document.getElementById("logoPreview");
+  var uploadArea = document.getElementById("logoUploadArea");
+  var removeBtn = document.getElementById("removeLogoBtn");
+
+  if (!uploadArea) return;
+
+  if (state.company.logo) {
+    // Show thumbnail + remove button
+    if (preview) {
+      preview.src = state.company.logo;
+      preview.style.display = "";
+    }
+    if (removeBtn) removeBtn.style.display = "";
+    uploadArea.classList.add("has-logo");
+  } else {
+    // Show upload prompt only
+    if (preview) {
+      preview.src = "";
+      preview.style.display = "none";
+    }
+    if (removeBtn) removeBtn.style.display = "none";
+    uploadArea.classList.remove("has-logo");
+  }
+}
+
+// ============================================================
 // Form Wiring Module
 // ============================================================
 
@@ -352,8 +446,17 @@ function renderPreview() {
 
   // --- Company info ---
   html += '<div class="inv-header">';
+  html += '<div class="inv-company">';
+
+  // Logo
+  if (state.company.logo) {
+    html +=
+      '<img src="' +
+      state.company.logo +
+      '" alt="Company Logo" class="inv-logo">';
+  }
+
   html +=
-    '<div class="inv-company">' +
     "<h3>" +
     dashIfEmpty(state.company.name) +
     "</h3>" +
@@ -477,7 +580,8 @@ function initForm() {
 
   // Populate form from current state
   populateFormFromState();
-  // Render initial preview
+  // Render initial thumbnail + preview
+  renderLogoThumbnail();
   renderPreview();
 
   // Simple field mappings: element ID → state path
@@ -545,6 +649,24 @@ function initForm() {
     });
   }
 
+  // Logo file input
+  var logoInput = document.getElementById("logoFileInput");
+  if (logoInput) {
+    logoInput.addEventListener("change", function (e) {
+      if (e.target.files && e.target.files[0]) {
+        handleLogoFile(e.target.files[0]);
+        // Reset file input so re-selecting the same file triggers change
+        e.target.value = "";
+      }
+    });
+  }
+
+  // Remove logo button
+  var removeLogoBtn = document.getElementById("removeLogoBtn");
+  if (removeLogoBtn) {
+    removeLogoBtn.addEventListener("click", removeCompanyLogo);
+  }
+
   // Reset All button
   var resetBtn = document.getElementById("resetAllBtn");
   if (resetBtn) {
@@ -553,6 +675,7 @@ function initForm() {
       _invoiceCounter = 1;
       _state = resetInvoice();
       populateFormFromState();
+      renderLogoThumbnail();
       renderPreview();
     });
   }

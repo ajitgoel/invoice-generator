@@ -119,6 +119,81 @@ h1 {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+/* Logo Upload */
+.logo-upload-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-upload-area.has-logo {
+  align-items: flex-start;
+}
+
+.logo-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+
+.logo-upload-prompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-upload-btn {
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.logo-formats {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.logo-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.btn-remove-logo {
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-remove-logo:hover {
+  background: #fecaca;
+}
+
+/* Logo in invoice preview */
+.inv-logo {
+  max-width: 120px;
+  max-height: 64px;
+  object-fit: contain;
+  margin-bottom: 8px;
+  display: block;
+}
+
 /* Line Items */
 .item-row {
   display: grid;
