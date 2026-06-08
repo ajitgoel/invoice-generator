@@ -915,6 +915,471 @@ function downloadPDF(element) {
 }
 
 // ============================================================
+// Products Catalog Module
+// ============================================================
+
+var PRODUCTS_STORAGE_KEY = "invoice_saved_products";
+
+// Module-level products array — loaded from localStorage on init
+var _products = [];
+
+/**
+ * Loads products from localStorage into the module-level array.
+ * @returns {Array} The products array [{id, description, unitPrice}, ...]
+ */
+function loadProducts() {
+  try {
+    var raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    if (raw) {
+      _products = JSON.parse(raw);
+    } else {
+      _products = [];
+    }
+  } catch (e) {
+    _products = [];
+  }
+  return _products;
+}
+
+/**
+ * Persists the current products array to localStorage.
+ */
+function saveProducts() {
+  try {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(_products));
+  } catch (e) {
+    // localStorage unavailable or full
+  }
+}
+
+/**
+ * Generates a unique ID for a new product (timestamp-based).
+ * @returns {string} Unique identifier
+ */
+function generateProductId() {
+  return "prod_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 6);
+}
+
+/**
+ * Validates a product before adding.
+ * Returns an error string if invalid, or null if valid.
+ * @param {string} name - Product description
+ * @param {string} priceStr - Unit price as string from the form input
+ * @returns {string|null} Error message or null
+ */
+function validateProduct(name, priceStr) {
+  if (!name || name.trim() === "") {
+    return "Please enter a product name or description.";
+  }
+  var price = parseFloat(priceStr);
+  if (isNaN(price) || price < 0) {
+    return "Please enter a valid non-negative price.";
+  }
+  return null;
+}
+
+/**
+ * Adds a product to the catalog.
+ * Validates the form, persists to storage, and re-renders the list.
+ * @param {string} name - Product description
+ * @param {number} price - Unit price
+ * @returns {boolean} True if the product was added, false if validation failed
+ */
+function addProduct(name, price) {
+  var error = validateProduct(name, String(price));
+  if (error) {
+    showProductError(error);
+    return false;
+  }
+  var parsedPrice = parseFloat(price);
+  _products.push({
+    id: generateProductId(),
+    description: name.trim(),
+    unitPrice: Math.round(parsedPrice * 100) / 100,
+  });
+  saveProducts();
+  renderProductsList();
+  showProductAddConfirm();
+  // Clear form inputs
+  setFieldValue("productName", "");
+  setFieldValue("productPrice", "");
+  return true;
+}
+
+/**
+ * Removes a product by ID from the catalog.
+ * @param {string} id - The product ID to delete
+ */
+function deleteProduct(id) {
+  _products = _products.filter(function (p) {
+    return p.id !== id;
+  });
+  saveProducts();
+  renderProductsList();
+}
+
+/**
+ * Renders the products list table (or empty state message).
+ */
+function renderProductsList() {
+  var table = document.getElementById("productsTable");
+  var tbody = document.getElementById("productsTableBody");
+  var emptyMsg = document.getElementById("productsEmptyMsg");
+
+  if (!table || !tbody) return;
+
+  // Clear table
+  tbody.innerHTML = "";
+
+  if (_products.length === 0) {
+    table.style.display = "none";
+    if (emptyMsg) emptyMsg.style.display = "";
+  } else {
+    table.style.display = "";
+    if (emptyMsg) emptyMsg.style.display = "none";
+
+    for (var i = 0; i < _products.length; i++) {
+      var product = _products[i];
+      var row = document.createElement("tr");
+
+      row.innerHTML =
+        "<td>" +
+        escapeHtml(product.description) +
+        "</td>" +
+        '<td class="product-price-cell">' +
+        formatCurrency(product.unitPrice) +
+        "</td>" +
+        '<td><button type="button" class="btn-delete-product" data-product-id="' +
+        product.id +
+        '">Delete</button></td>';
+
+      tbody.appendChild(row);
+    }
+  }
+
+  // Refresh the product selector in the invoice form
+  populateProductSelector();
+}
+
+/**
+ * Shows a brief confirmation when a product is added.
+ */
+function showProductAddConfirm() {
+  var el = document.getElementById("productAddMsg");
+  if (!el) return;
+  // Hide any lingering error
+  var errEl = document.getElementById("productErrorMsg");
+  if (errEl) errEl.style.display = "none";
+  el.style.display = "inline-block";
+  el.style.animation = "none";
+  el.offsetHeight;
+  el.style.animation = "";
+  setTimeout(function () {
+    el.style.display = "none";
+  }, 2000);
+}
+
+/**
+ * Shows a validation error message for the product form.
+ * @param {string} msg - The error text
+ */
+function showProductError(msg) {
+  var el = document.getElementById("productErrorMsg");
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = "inline-block";
+  el.style.animation = "none";
+  el.offsetHeight;
+  el.style.animation = "";
+  // Auto-hide after 3 seconds
+  setTimeout(function () {
+    el.style.opacity = "0";
+    el.style.transition = "opacity 0.3s ease";
+    setTimeout(function () {
+      el.style.display = "none";
+      el.style.opacity = "1";
+      el.style.transition = "";
+    }, 300);
+  }, 3000);
+}
+
+// ============================================================
+// Autocomplete & Suggestions Module
+// ============================================================
+
+/**
+ * Reads the saved company profile from localStorage.
+ * @returns {Object|null} The profile {name, address, email, logo} or null
+ */
+function getSavedCompanyProfile() {
+  try {
+    var raw = localStorage.getItem(COMPANY_PROFILE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Reads the saved customer profile from localStorage.
+ * @returns {Object|null} The profile {name, address, email} or null
+ */
+function getSavedCustomerProfile() {
+  try {
+    var raw = localStorage.getItem(CUSTOMER_PROFILE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Shows a suggestion dropdown below an input element.
+ * @param {HTMLElement} inputEl - The input element
+ * @param {string} suggestionElId - The ID of the suggestion <ul> element
+ * @param {Array} items - Array of {label, sub} suggestion objects
+ * @param {function} onSelect - Callback(item, index) when an item is clicked
+ */
+function showSuggestions(inputEl, suggestionElId, items, onSelect) {
+  var dropdown = document.getElementById(suggestionElId);
+  if (!dropdown || items.length === 0) {
+    if (dropdown) dropdown.classList.remove("visible");
+    return;
+  }
+
+  dropdown.innerHTML = "";
+  for (var i = 0; i < items.length; i++) {
+    var li = document.createElement("li");
+    li.setAttribute("data-index", i);
+    li.textContent = items[i].label;
+    if (items[i].sub) {
+      var span = document.createElement("span");
+      span.className = "suggestion-label";
+      span.textContent = items[i].sub;
+      li.appendChild(span);
+    }
+    // Store callback reference via closure
+    li.addEventListener("mousedown", (function (item, idx) {
+      return function (e) {
+        e.preventDefault(); // prevent input blur before click fires
+        onSelect(item, idx);
+        hideAllSuggestions();
+      };
+    })(items[i], i));
+    dropdown.appendChild(li);
+  }
+
+  dropdown.classList.add("visible");
+}
+
+/**
+ * Hides all suggestion dropdowns.
+ * @param {string} [exceptId] - Optional ID of a dropdown to keep open
+ */
+function hideAllSuggestions(exceptId) {
+  var dropdowns = document.querySelectorAll(".suggestion-dropdown");
+  for (var i = 0; i < dropdowns.length; i++) {
+    if (exceptId && dropdowns[i].id === exceptId) continue;
+    dropdowns[i].classList.remove("visible");
+  }
+}
+
+/**
+ * Applies a saved company profile to the active invoice state and form.
+ * @param {Object} profile - The company profile {name, address, email, logo}
+ */
+function applyCompanySuggestion(profile) {
+  if (!profile) return;
+  // Update state fields
+  updateInvoiceField("company.name", profile.name || "");
+  updateInvoiceField("company.address", profile.address || "");
+  updateInvoiceField("company.email", profile.email || "");
+  // Update form inputs
+  setFieldValue("companyName", profile.name || "");
+  setFieldValue("companyAddress", profile.address || "");
+  setFieldValue("companyEmail", profile.email || "");
+  // Apply logo
+  if (profile.logo) {
+    setCompanyLogo(profile.logo);
+  } else {
+    removeCompanyLogo();
+  }
+}
+
+/**
+ * Applies a saved customer profile to the active invoice state and form.
+ * @param {Object} profile - The customer profile {name, address, email}
+ */
+function applyCustomerSuggestion(profile) {
+  if (!profile) return;
+  // Update state fields
+  updateInvoiceField("client.name", profile.name || "");
+  updateInvoiceField("client.address", profile.address || "");
+  updateInvoiceField("client.email", profile.email || "");
+  // Update form inputs
+  setFieldValue("clientName", profile.name || "");
+  setFieldValue("clientAddress", profile.address || "");
+  setFieldValue("clientEmail", profile.email || "");
+  renderPreview();
+  autoSave();
+}
+
+/**
+ * Wires up autocomplete suggestion dropdowns for Company Name and Client Name inputs.
+ */
+function initAutocomplete() {
+  // --- Company Name Autocomplete ---
+  var companyInput = document.getElementById("companyName");
+  var companyDropdown = document.getElementById("companyNameSuggestions");
+
+  if (companyInput && companyDropdown) {
+    companyInput.addEventListener("focus", function () {
+      var profile = getSavedCompanyProfile();
+      if (profile && profile.name) {
+        var filter = companyInput.value.trim().toLowerCase();
+        if (!filter || profile.name.toLowerCase().indexOf(filter) !== -1) {
+          showSuggestions(companyInput, "companyNameSuggestions", [
+            { label: profile.name, sub: profile.address || profile.email || "" }
+          ], function (item) {
+            applyCompanySuggestion(profile);
+          });
+        }
+      }
+    });
+
+    companyInput.addEventListener("input", function () {
+      var profile = getSavedCompanyProfile();
+      if (profile && profile.name) {
+        var filter = companyInput.value.trim().toLowerCase();
+        if (!filter || profile.name.toLowerCase().indexOf(filter) !== -1) {
+          showSuggestions(companyInput, "companyNameSuggestions", [
+            { label: profile.name, sub: profile.address || profile.email || "" }
+          ], function (item) {
+            applyCompanySuggestion(profile);
+          });
+        } else {
+          companyDropdown.classList.remove("visible");
+        }
+      }
+    });
+
+    // Hide on blur after a short delay to allow mousedown on suggestion
+    companyInput.addEventListener("blur", function () {
+      setTimeout(function () {
+        hideAllSuggestions();
+      }, 150);
+    });
+  }
+
+  // --- Client Name Autocomplete ---
+  var clientInput = document.getElementById("clientName");
+  var clientDropdown = document.getElementById("clientNameSuggestions");
+
+  if (clientInput && clientDropdown) {
+    clientInput.addEventListener("focus", function () {
+      var profile = getSavedCustomerProfile();
+      if (profile && profile.name) {
+        var filter = clientInput.value.trim().toLowerCase();
+        if (!filter || profile.name.toLowerCase().indexOf(filter) !== -1) {
+          showSuggestions(clientInput, "clientNameSuggestions", [
+            { label: profile.name, sub: profile.address || profile.email || "" }
+          ], function (item) {
+            applyCustomerSuggestion(profile);
+          });
+        }
+      }
+    });
+
+    clientInput.addEventListener("input", function () {
+      var profile = getSavedCustomerProfile();
+      if (profile && profile.name) {
+        var filter = clientInput.value.trim().toLowerCase();
+        if (!filter || profile.name.toLowerCase().indexOf(filter) !== -1) {
+          showSuggestions(clientInput, "clientNameSuggestions", [
+            { label: profile.name, sub: profile.address || profile.email || "" }
+          ], function (item) {
+            applyCustomerSuggestion(profile);
+          });
+        } else {
+          clientDropdown.classList.remove("visible");
+        }
+      }
+    });
+
+    clientInput.addEventListener("blur", function () {
+      setTimeout(function () {
+        hideAllSuggestions();
+      }, 150);
+    });
+  }
+}
+
+// ============================================================
+// Product Selector in Invoice Form
+// ============================================================
+
+/**
+ * Populates the product selector dropdown in the invoice form with
+ * saved products from the catalog.
+ */
+function populateProductSelector() {
+  var selector = document.getElementById("productSelector");
+  if (!selector) return;
+
+  // Clear existing options except the placeholder
+  while (selector.options.length > 1) {
+    selector.remove(1);
+  }
+
+  var products = _products;
+  for (var i = 0; i < products.length; i++) {
+    var option = document.createElement("option");
+    option.value = products[i].id;
+    option.textContent = products[i].description + " (" + formatCurrency(products[i].unitPrice) + ")";
+    selector.appendChild(option);
+  }
+}
+
+/**
+ * Handles product selection from the dropdown — appends a pre-filled
+ * line item to the invoice and resets the selector.
+ */
+function handleProductSelect() {
+  var selector = document.getElementById("productSelector");
+  if (!selector) return;
+  var productId = selector.value;
+  if (!productId) return;
+
+  // Find the product
+  var product = null;
+  for (var i = 0; i < _products.length; i++) {
+    if (_products[i].id === productId) {
+      product = _products[i];
+      break;
+    }
+  }
+  if (!product) {
+    selector.value = "";
+    return;
+  }
+
+  var state = getInvoiceState();
+  state.items.push({
+    description: product.description,
+    quantity: 1,
+    unitPrice: product.unitPrice,
+  });
+  renderLineItems();
+  renderPreview();
+  autoSave();
+
+  // Reset selector to placeholder
+  selector.value = "";
+}
+
+// ============================================================
 // Tab Navigation Module
 // ============================================================
 
@@ -996,8 +1461,42 @@ function initProfileForms() {
     saveCustomerBtn.addEventListener("click", saveCustomerProfile);
   }
 
-  // --- Products Tab ---
-  // Placeholder — full implementation in issue 09
+  // --- Products Catalog ---
+
+  // Load products from localStorage and render the list
+  loadProducts();
+  renderProductsList();
+  // Also populate the product selector in the invoice form
+  populateProductSelector();
+
+  // Add Product button
+  var addProductBtn = document.getElementById("addProductBtn");
+  if (addProductBtn) {
+    addProductBtn.addEventListener("click", function () {
+      var nameInput = document.getElementById("productName");
+      var priceInput = document.getElementById("productPrice");
+      if (nameInput && priceInput) {
+        addProduct(nameInput.value, priceInput.value);
+      }
+    });
+  }
+
+  // Delegate clicks on the products table body for delete buttons
+  var productsTbody = document.getElementById("productsTableBody");
+  if (productsTbody) {
+    productsTbody.addEventListener("click", function (e) {
+      var target = e.target;
+      if (target.classList.contains("btn-delete-product") && target.dataset.productId) {
+        deleteProduct(target.dataset.productId);
+      }
+    });
+  }
+
+  // Product selector in invoice form — add line item on selection
+  var productSelector = document.getElementById("productSelector");
+  if (productSelector) {
+    productSelector.addEventListener("change", handleProductSelect);
+  }
 }
 
 // Initialize form on DOM ready (browser only)
@@ -1006,5 +1505,8 @@ if (typeof document !== "undefined") {
     initForm();
     initTabs();
     initProfileForms();
+    initAutocomplete();
+    // Populate product selector (products already loaded by initProfileForms)
+    populateProductSelector();
   });
 }

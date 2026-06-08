@@ -626,3 +626,175 @@ h1 {
   color: hsl(220, 9%, 60%);
   font-size: 0.9375rem;
 }
+
+/* ============================================================
+   Products Catalog Table & Form
+   ============================================================ */
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.products-table thead th {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 2px solid hsl(220, 13%, 91%);
+  font-weight: 600;
+  color: hsl(220, 9%, 30%);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.products-table thead th:last-child {
+  text-align: right;
+  width: 60px;
+}
+
+.products-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid hsl(220, 14%, 96%);
+  color: hsl(220, 20%, 14%);
+  vertical-align: middle;
+}
+
+.products-table tbody td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.products-table tbody tr:hover {
+  background: hsl(220, 20%, 98%);
+}
+
+.product-price-cell {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.btn-delete-product {
+  background: hsl(0, 79%, 92%);
+  color: hsl(0, 72%, 51%);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.btn-delete-product:hover {
+  background: hsl(0, 84%, 85%);
+}
+
+/* Validation error styling */
+.field-error {
+  display: inline-block;
+  margin-left: 12px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: hsl(0, 72%, 51%);
+}
+
+.empty-msg {
+  text-align: center;
+  color: hsl(220, 9%, 60%);
+  font-size: 0.875rem;
+  padding: 20px 0;
+  margin: 0;
+}
+
+/* ============================================================
+   Autocomplete Suggestion Dropdown
+   ============================================================ */
+
+.suggestion-wrapper {
+  position: relative;
+}
+
+.suggestion-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid hsl(221, 83%, 53%);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.suggestion-dropdown.visible {
+  display: block;
+}
+
+.suggestion-dropdown li {
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  color: hsl(220, 20%, 14%);
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.suggestion-dropdown li:hover,
+.suggestion-dropdown li.highlighted {
+  background: hsl(221, 90%, 96%);
+  color: hsl(221, 83%, 40%);
+}
+
+.suggestion-dropdown li .suggestion-label {
+  font-size: 0.75rem;
+  color: hsl(220, 9%, 55%);
+  display: block;
+}
+
+/* ============================================================
+   Product Selector in Invoice Form
+   ============================================================ */
+
+.product-selector-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.product-selector {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a2e;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.product-selector:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.product-selector option.placeholder-option {
+  color: hsl(220, 9%, 60%);
+}
