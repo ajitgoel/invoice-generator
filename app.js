@@ -47,8 +47,77 @@ function calculateTotals(state) {
 }
 
 // Module-level state and invoice counter
+// Initialized directly (not via resetInvoice) to avoid premature counter increment.
+// initForm() will overwrite _state if saved data exists, or call resetInvoice() if not.
 var _invoiceCounter = 1;
-var _state = resetInvoice();
+var _state = {
+  invoiceNumber: "001",
+  date: new Date().toISOString().split("T")[0],
+  company: { name: "", address: "", email: "", logo: null },
+  client: { name: "", address: "", email: "" },
+  items: [{ description: "", quantity: 1, unitPrice: 0 }],
+  taxRate: 0,
+  notes: "",
+  totals: { subtotal: 0, tax: 0, total: 0 },
+};
+
+// ============================================================
+// localStorage Persistence Module
+// ============================================================
+
+var STORAGE_KEY = "invoiceGeneratorState";
+var COUNTER_KEY = "invoiceGeneratorCounter";
+
+/**
+ * Saves current state and invoice counter to localStorage.
+ * Silently no-ops if localStorage is unavailable (private browsing).
+ */
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(_state));
+    localStorage.setItem(COUNTER_KEY, String(_invoiceCounter));
+  } catch (e) {
+    // localStorage unavailable or full — silently ignore
+  }
+}
+
+/**
+ * Loads state and counter from localStorage.
+ * Returns the parsed state object, or null if nothing saved or unavailable.
+ */
+function loadFromStorage() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    var counter = localStorage.getItem(COUNTER_KEY);
+    if (counter) {
+      _invoiceCounter = parseInt(counter, 10) || 1;
+    }
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Clears stored invoice data and counter from localStorage.
+ */
+function clearStorage() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(COUNTER_KEY);
+  } catch (e) {
+    // silently ignore
+  }
+}
+
+/**
+ * Helper: auto-save current state to localStorage.
+ * Called on every state mutation.
+ */
+function autoSave() {
+  saveToStorage();
+}
 
 /**
  * Returns the current invoice state object.
@@ -176,6 +245,7 @@ function addItem() {
   state.items.push({ description: "", quantity: 1, unitPrice: 0 });
   renderLineItems();
   renderPreview();
+  autoSave();
 }
 
 /**
@@ -187,6 +257,7 @@ function removeItem(index) {
     state.items.splice(index, 1);
     renderLineItems();
     renderPreview();
+    autoSave();
   }
 }
 
@@ -348,7 +419,16 @@ function renderPreview() {
  * Initializes all form event listeners.
  */
 function initForm() {
-  // Populate form from initial state
+  // Try to restore state from localStorage
+  var savedState = loadFromStorage();
+  if (savedState) {
+    _state = savedState;
+  } else {
+    // No saved data — use a fresh state with auto-increment
+    _state = resetInvoice();
+  }
+
+  // Populate form from current state
   populateFormFromState();
   // Render initial preview
   renderPreview();
@@ -374,6 +454,7 @@ function initForm() {
       el.addEventListener("input", function () {
         updateInvoiceField(fieldMappings[id], el.value);
         renderPreview();
+        autoSave();
       });
     }
   });
@@ -388,6 +469,7 @@ function initForm() {
           "items[" + target.dataset.index + "]." + target.dataset.field;
         updateInvoiceField(path, target.value);
         renderPreview();
+        autoSave();
       }
     });
 
@@ -413,6 +495,18 @@ function initForm() {
   if (downloadBtn) {
     downloadBtn.addEventListener("click", function () {
       downloadPDF(document.getElementById("invoicePreview"));
+    });
+  }
+
+  // Reset All button
+  var resetBtn = document.getElementById("resetAllBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", function () {
+      clearStorage();
+      _invoiceCounter = 1;
+      _state = resetInvoice();
+      populateFormFromState();
+      renderPreview();
     });
   }
 }

@@ -198,10 +198,25 @@ h1 {
   cursor: wait;
 }
 
+.btn-reset {
+  background: #fff;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  padding: 12px 24px;
+}
+
+.btn-reset:hover {
+  background: #f9fafb;
+  color: #374151;
+  border-color: #9ca3af;
+}
+
 /* Download section */
 .download-section {
   display: flex;
   justify-content: center;
+  gap: 16px;
   margin-top: 24px;
 }
 
