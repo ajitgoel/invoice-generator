@@ -709,14 +709,9 @@ function downloadPDF(element) {
   if (btnSpinner) btnSpinner.className = "";
   if (btn) btn.disabled = true;
 
-  // html2canvas cannot render sticky-positioned elements correctly — it
-  // captures only the viewport-constrained slice. We build a clean clone
-  // in a temporary offscreen container, capture that, then remove it.
-  // The clone is rendered at position:fixed (so html2canvas sees it),
-  // but covered by the loading spinner (z-index:9999).
   var wrapper = document.createElement("div");
   wrapper.style.cssText =
-    "position:fixed;left:0;top:0;width:800px;z-index:9998;background:#fff;" +
+    "position:absolute;left:0;top:0;width:800px;z-index:9998;background:#fff;" +
     "padding:24px;";
 
   var clone = element.cloneNode(true);
@@ -736,7 +731,7 @@ function downloadPDF(element) {
     margin: 0.5,
     filename: filename,
     image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
+    html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
     jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
   };
 
@@ -749,7 +744,7 @@ function downloadPDF(element) {
 
   html2pdf()
     .set(opt)
-    .from(wrapper)
+    .from(clone)
     .save()
     .then(cleanup)
     .catch(function () {
