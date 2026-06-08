@@ -1,0 +1,24 @@
+{
+  "name": "invoice-generator",
+  "version": "1.0.0",
+  "description": "Client-side invoice generator",
+  "main": "app.js",
+  "scripts": {
+    "test": "node test/run-tests.mjs",
+    "typecheck": "node -e \"console.log('typecheck: no TypeScript files to check')\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajitgoel/invoice-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ajitgoel/invoice-generator/issues"
+  },
+  "homepage": "https://github.com/ajitgoel/invoice-generator#readme",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
