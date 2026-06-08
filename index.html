@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Invoice Generator</h1>
+
+    <div class="layout">
+      <!-- Form Column -->
+      <div class="form-column">
+        <div class="card">
+          <!-- Invoice Info -->
+          <section class="form-section">
+            <h2>Invoice Info</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="invoiceNumber">Invoice Number</label>
+                <input type="text" id="invoiceNumber" placeholder="001">
+              </div>
+              <div class="form-group">
+                <label for="invoiceDate">Date</label>
+                <input type="date" id="invoiceDate">
+              </div>
+            </div>
+          </section>
+
+          <!-- Company Details -->
+          <section class="form-section">
+            <h2>Your Company</h2>
+            <div class="form-group">
+              <label for="companyName">Company Name</label>
+              <input type="text" id="companyName" placeholder="Acme Inc.">
+            </div>
+            <div class="form-group">
+              <label for="companyAddress">Address</label>
+              <input type="text" id="companyAddress" placeholder="123 Business St, City, State ZIP">
+            </div>
+            <div class="form-group">
+              <label for="companyEmail">Email</label>
+              <input type="email" id="companyEmail" placeholder="billing@acme.com">
+            </div>
+          </section>
+
+          <!-- Client Details -->
+          <section class="form-section">
+            <h2>Bill To</h2>
+            <div class="form-group">
+              <label for="clientName">Client Name</label>
+              <input type="text" id="clientName" placeholder="Client Company">
+            </div>
+            <div class="form-group">
+              <label for="clientAddress">Client Address</label>
+              <input type="text" id="clientAddress" placeholder="456 Client Ave, City, State ZIP">
+            </div>
+            <div class="form-group">
+              <label for="clientEmail">Client Email</label>
+              <input type="email" id="clientEmail" placeholder="accounts@client.com">
+            </div>
+          </section>
+
+          <!-- Line Items -->
+          <section class="form-section">
+            <h2>Line Items</h2>
+            <div id="itemsContainer">
+              <!-- Dynamically populated -->
+            </div>
+            <button type="button" id="addItemBtn" class="btn btn-secondary">+ Add Item</button>
+          </section>
+
+          <!-- Tax & Notes -->
+          <section class="form-section">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="taxRate">Tax Rate (%)</label>
+                <input type="number" id="taxRate" value="0" min="0" max="100" step="0.01">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="notes">Notes / Terms</label>
+              <textarea id="notes" rows="3" placeholder="Payment due within 30 days. Thank you for your business!"></textarea>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Preview Column -->
+      <div class="preview-column">
+        <div class="card preview-card" id="invoicePreview">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
