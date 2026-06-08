@@ -709,6 +709,19 @@ function downloadPDF(element) {
   if (btnSpinner) btnSpinner.className = "";
   if (btn) btn.disabled = true;
 
+  // html2canvas has known issues with position:sticky — it clips content
+  // to the viewport-constrained height. Temporarily override to static
+  // with auto height so the full invoice renders, then restore.
+  var savedPosition = element.style.position;
+  var savedHeight = element.style.height;
+  var savedMaxHeight = element.style.maxHeight;
+  var savedOverflow = element.style.overflow;
+
+  element.style.position = "static";
+  element.style.height = "auto";
+  element.style.maxHeight = "none";
+  element.style.overflow = "visible";
+
   var opt = {
     margin: 0.5,
     filename: filename,
@@ -717,19 +730,23 @@ function downloadPDF(element) {
     jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
   };
 
+  function cleanup() {
+    element.style.position = savedPosition;
+    element.style.height = savedHeight;
+    element.style.maxHeight = savedMaxHeight;
+    element.style.overflow = savedOverflow;
+    if (btnText) btnText.style.display = "";
+    if (btnSpinner) btnSpinner.className = "spinner-hidden";
+    if (btn) btn.disabled = false;
+  }
+
   html2pdf()
     .set(opt)
     .from(element)
     .save()
-    .then(function () {
-      if (btnText) btnText.style.display = "";
-      if (btnSpinner) btnSpinner.className = "spinner-hidden";
-      if (btn) btn.disabled = false;
-    })
+    .then(cleanup)
     .catch(function () {
-      if (btnText) btnText.style.display = "";
-      if (btnSpinner) btnSpinner.className = "spinner-hidden";
-      if (btn) btn.disabled = false;
+      cleanup();
       alert("PDF generation failed. Please try again.");
     });
 }
