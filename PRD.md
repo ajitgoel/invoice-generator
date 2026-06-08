@@ -41,13 +41,14 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 - [ ] Typecheck/lint passes.
 - [ ] Verify in browser using dev-browser skill.
 
-#### US-018: Manage Bill To Customer profile in a separate tab
-**Description:** As a freelancer, I want a dedicated tab to save a single customer's information (client name, address, email) so I can quickly load them on my invoices.
+#### US-018: Manage multiple Bill To Customer profiles in a separate tab
+**Description:** As a freelancer, I want a dedicated tab to save and manage multiple customer profiles (client name, address, email) so I can quickly load them on my invoices.
 
 **Acceptance Criteria:**
-- [ ] Selecting the "Bill To Customer" tab hides other views and shows a form with fields for Client Name, Address, and Email.
-- [ ] Saving the profile persists the data to `localStorage` under `invoice_saved_customer`.
-- [ ] If saved customer data exists, it is loaded automatically when loading the page and the tab.
+- [ ] Selecting the "Bill To Customer" tab hides other views and shows a form to add a new customer (fields: Client Name, Address, and Email) and a table of saved customers below it.
+- [ ] Each customer in the saved list has a "Delete" button that removes them from the catalog.
+- [ ] Customers list is persisted in `localStorage` under `invoice_saved_customers` (JSON array of customer objects with unique IDs).
+- [ ] Validation ensures client name is not blank and email/address are trimmed.
 - [ ] Typecheck/lint passes.
 - [ ] Verify in browser using dev-browser skill.
 
@@ -63,13 +64,13 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 - [ ] Verify in browser using dev-browser skill.
 
 #### US-020: Auto-populate Company & Customer Details via Suggestions
-**Description:** As a freelancer, I want to auto-populate the Invoice Generator form fields using suggestions from my saved company and customer profiles.
+**Description:** As a freelancer, I want to auto-populate the Invoice Generator form fields using suggestions from my saved company and multiple customer profiles.
 
 **Acceptance Criteria:**
 - [ ] In the Invoice Generator tab, focusing the "Company Name" input displays a suggestion dropdown showing the saved company profile (if set).
 - [ ] Selecting the suggestion auto-populates Company Name, Address, Email, and Logo.
-- [ ] Focusing the "Client Name" input displays a suggestion dropdown showing the saved customer profile (if set).
-- [ ] Selecting the suggestion auto-populates Client Name, Address, and Email.
+- [ ] Focusing the "Client Name" input displays a suggestion dropdown showing matching saved customer profiles based on what is typed (or all saved customer profiles if field is empty).
+- [ ] Selecting a customer suggestion auto-populates Client Name, Address, and Email.
 - [ ] Standard typing override remains available.
 - [ ] Typecheck/lint passes.
 - [ ] Verify in browser using dev-browser skill.
@@ -94,7 +95,7 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 - **localStorage persistence**:
   - Invoice session state autosaves under `invoiceGeneratorState` on changes.
   - Saved company profile saved under `invoice_saved_company`.
-  - Saved customer profile saved under `invoice_saved_customer`.
+  - Saved customer profiles list saved under `invoice_saved_customers` (JSON array of customer objects).
   - Saved products list saved under `invoice_saved_products` (JSON array).
 - **AdSense placement**: Single banner ad below the invoice generation area (after the "Download PDF" button). Non-intrusive, doesn't compete with form input space.
 
@@ -134,8 +135,8 @@ User Typing/Selecting Suggestion → state update → re-render preview → auto
 
 #### Saved Data State (in localStorage)
 - Key `invoice_saved_company`: `{ name: "", address: "", email: "", logo: null }`
-- Key `invoice_saved_customer`: `{ name: "", address: "", email: "" }`
-- Key `invoice_saved_products`: `[{ id: "uuid-or-timestamp", description: "", unitPrice: 0 }]`
+- Key `invoice_saved_customers`: `[{ id: "cust_uuid-or-timestamp", name: "", address: "", email: "" }]`
+- Key `invoice_saved_products`: `[{ id: "prod_uuid-or-timestamp", description: "", unitPrice: 0 }]`
 
 ### Visual Design
 
@@ -171,7 +172,6 @@ User Typing/Selecting Suggestion → state update → re-render preview → auto
 - Time tracking
 - Expense tracking
 - Multiple saved company profiles (only a single saved company profile is supported)
-- Multiple saved customer profiles (only a single saved customer profile is supported)
 
 ## Further Notes
 

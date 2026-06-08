@@ -183,11 +183,11 @@
       </div>
     </div><!-- /#view-company -->
 
-    <!-- Bill To Customer Profile View -->
+    <!-- Bill To Customer Profiles View -->
     <div id="view-customer" class="view-container">
       <div class="card profile-card">
-        <h2>Bill To Customer Profile</h2>
-        <p class="profile-desc">Save your customer's details to reuse across invoices.</p>
+        <h2>Add Customer</h2>
+        <p class="profile-desc">Save multiple customer profiles to reuse across invoices.</p>
         <section class="form-section">
           <div class="form-group">
             <label for="profileClientName">Client Name</label>
@@ -201,9 +201,31 @@
             <label for="profileClientEmail">Client Email</label>
             <input type="email" id="profileClientEmail" placeholder="accounts@client.com">
           </div>
+          <button type="button" id="addCustomerBtn" class="btn btn-primary">Add Customer</button>
+          <span id="customerAddedMsg" class="save-confirm" style="display:none">&#10003; Customer added</span>
+          <span id="customerErrorMsg" class="field-error" style="display:none"></span>
         </section>
-        <button type="button" id="saveCustomerProfileBtn" class="btn btn-primary">Save Profile</button>
-        <span id="customerProfileSavedMsg" class="save-confirm" style="display:none">&#10003; Profile saved</span>
+
+        <!-- Saved Customers List -->
+        <section class="form-section" style="border-bottom:none;padding-bottom:0;">
+          <h2>Saved Customers</h2>
+          <div id="customersListContainer">
+            <table class="products-table" id="customersTable" style="display:none;">
+              <thead>
+                <tr>
+                  <th>Client Name</th>
+                  <th>Address</th>
+                  <th>Email</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="customersTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+            <p id="customersEmptyMsg" class="empty-msg" style="display:none;">No customers saved yet. Add one above.</p>
+          </div>
+        </section>
       </div>
     </div><!-- /#view-customer -->
 

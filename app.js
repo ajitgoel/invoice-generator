@@ -163,10 +163,13 @@ function clearStorage() {
 // ============================================================
 
 var COMPANY_PROFILE_KEY = "invoice_saved_company";
-var CUSTOMER_PROFILE_KEY = "invoice_saved_customer";
+var CUSTOMERS_STORAGE_KEY = "invoice_saved_customers";
 
 // Module-level variable for the company profile logo data URL
 var _profileCompanyLogo = null;
+
+// Module-level customers array — loaded from localStorage on init
+var _customers = [];
 
 /**
  * Saves the My Company profile from form fields to localStorage.
@@ -187,20 +190,193 @@ function saveCompanyProfile() {
 }
 
 /**
- * Saves the Bill To Customer profile from form fields to localStorage.
+ * Loads customers from localStorage into the module-level array.
+ * Migrates legacy single-customer key if present.
+ * @returns {Array} The customers array [{id, name, address, email}, ...]
  */
-function saveCustomerProfile() {
-  var profile = {
-    name: document.getElementById("profileClientName").value.trim(),
-    address: document.getElementById("profileClientAddress").value.trim(),
-    email: document.getElementById("profileClientEmail").value.trim(),
-  };
+function loadCustomers() {
   try {
-    localStorage.setItem(CUSTOMER_PROFILE_KEY, JSON.stringify(profile));
-    showSaveConfirm("customerProfileSavedMsg");
+    var raw = localStorage.getItem(CUSTOMERS_STORAGE_KEY);
+    if (raw) {
+      _customers = JSON.parse(raw);
+      return _customers;
+    }
+    // Migrate legacy single-customer key if present
+    var legacyRaw = localStorage.getItem("invoice_saved_customer");
+    if (legacyRaw) {
+      var legacy = JSON.parse(legacyRaw);
+      if (legacy && legacy.name) {
+        _customers = [{
+          id: generateCustomerId(),
+          name: legacy.name || "",
+          address: legacy.address || "",
+          email: legacy.email || "",
+        }];
+        saveCustomers();
+        localStorage.removeItem("invoice_saved_customer");
+        return _customers;
+      }
+    }
+    _customers = [];
+  } catch (e) {
+    _customers = [];
+  }
+  return _customers;
+}
+
+/**
+ * Persists the current customers array to localStorage.
+ */
+function saveCustomers() {
+  try {
+    localStorage.setItem(CUSTOMERS_STORAGE_KEY, JSON.stringify(_customers));
   } catch (e) {
     // localStorage unavailable or full
   }
+}
+
+/**
+ * Generates a unique ID for a new customer.
+ * @returns {string} Unique identifier
+ */
+function generateCustomerId() {
+  return "cust_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 6);
+}
+
+/**
+ * Validates customer form data.
+ * @param {string} name - Customer name
+ * @returns {string|null} Error message or null if valid
+ */
+function validateCustomer(name) {
+  if (!name || name.trim() === "") {
+    return "Please enter a client name.";
+  }
+  return null;
+}
+
+/**
+ * Adds a customer to the saved list.
+ * Validates, persists to storage, clears form, re-renders.
+ * @param {string} name - Client name
+ * @param {string} address - Client address
+ * @param {string} email - Client email
+ * @returns {boolean} True if added, false if validation failed
+ */
+function addCustomer(name, address, email) {
+  var error = validateCustomer(name);
+  if (error) {
+    showCustomerError(error);
+    return false;
+  }
+  _customers.push({
+    id: generateCustomerId(),
+    name: name.trim(),
+    address: (address || "").trim(),
+    email: (email || "").trim(),
+  });
+  saveCustomers();
+  renderCustomersList();
+  showCustomerAddedConfirm();
+  // Clear form inputs
+  setFieldValue("profileClientName", "");
+  setFieldValue("profileClientAddress", "");
+  setFieldValue("profileClientEmail", "");
+  return true;
+}
+
+/**
+ * Removes a customer by ID from the saved list.
+ * @param {string} id - The customer ID to delete
+ */
+function deleteCustomer(id) {
+  _customers = _customers.filter(function (c) {
+    return c.id !== id;
+  });
+  saveCustomers();
+  renderCustomersList();
+}
+
+/**
+ * Renders the customers list table (or empty state message).
+ */
+function renderCustomersList() {
+  var table = document.getElementById("customersTable");
+  var tbody = document.getElementById("customersTableBody");
+  var emptyMsg = document.getElementById("customersEmptyMsg");
+
+  if (!table || !tbody) return;
+
+  tbody.innerHTML = "";
+
+  if (_customers.length === 0) {
+    table.style.display = "none";
+    if (emptyMsg) emptyMsg.style.display = "";
+  } else {
+    table.style.display = "";
+    if (emptyMsg) emptyMsg.style.display = "none";
+
+    for (var i = 0; i < _customers.length; i++) {
+      var customer = _customers[i];
+      var row = document.createElement("tr");
+
+      row.innerHTML =
+        "<td>" +
+        escapeHtml(customer.name) +
+        "</td>" +
+        "<td>" +
+        escapeHtml(customer.address) +
+        "</td>" +
+        "<td>" +
+        escapeHtml(customer.email) +
+        "</td>" +
+        '<td><button type="button" class="btn-delete-product" data-customer-id="' +
+        customer.id +
+        '">Delete</button></td>';
+
+      tbody.appendChild(row);
+    }
+  }
+}
+
+/**
+ * Shows a brief confirmation when a customer is added.
+ */
+function showCustomerAddedConfirm() {
+  var el = document.getElementById("customerAddedMsg");
+  if (!el) return;
+  var errEl = document.getElementById("customerErrorMsg");
+  if (errEl) errEl.style.display = "none";
+  el.style.display = "inline-block";
+  el.style.animation = "none";
+  el.offsetHeight;
+  el.style.animation = "";
+  setTimeout(function () {
+    el.style.display = "none";
+  }, 2000);
+}
+
+/**
+ * Shows a validation error message for the customer form.
+ * @param {string} msg - The error text
+ */
+function showCustomerError(msg) {
+  var el = document.getElementById("customerErrorMsg");
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = "inline-block";
+  el.style.animation = "none";
+  el.offsetHeight;
+  el.style.animation = "";
+  setTimeout(function () {
+    el.style.opacity = "0";
+    el.style.transition = "opacity 0.3s ease";
+    setTimeout(function () {
+      el.style.display = "none";
+      el.style.opacity = "1";
+      el.style.transition = "";
+    }, 300);
+  }, 3000);
 }
 
 /**
@@ -234,22 +410,6 @@ function loadCompanyProfile() {
     if (profile.email !== undefined) setFieldValue("profileCompanyEmail", profile.email);
     _profileCompanyLogo = profile.logo || null;
     renderProfileCompanyLogo();
-  } catch (e) {
-    // silently ignore parse errors
-  }
-}
-
-/**
- * Loads the Bill To Customer profile from localStorage and populates the form.
- */
-function loadCustomerProfile() {
-  try {
-    var raw = localStorage.getItem(CUSTOMER_PROFILE_KEY);
-    if (!raw) return;
-    var profile = JSON.parse(raw);
-    if (profile.name !== undefined) setFieldValue("profileClientName", profile.name);
-    if (profile.address !== undefined) setFieldValue("profileClientAddress", profile.address);
-    if (profile.email !== undefined) setFieldValue("profileClientEmail", profile.email);
   } catch (e) {
     // silently ignore parse errors
   }
@@ -1122,17 +1282,11 @@ function getSavedCompanyProfile() {
 }
 
 /**
- * Reads the saved customer profile from localStorage.
- * @returns {Object|null} The profile {name, address, email} or null
+ * Reads saved customer profiles from localStorage.
+ * @returns {Array} Array of customer profiles [{id, name, address, email}, ...]
  */
-function getSavedCustomerProfile() {
-  try {
-    var raw = localStorage.getItem(CUSTOMER_PROFILE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (e) {
-    return null;
-  }
+function getSavedCustomers() {
+  return _customers;
 }
 
 /**
@@ -1279,28 +1433,44 @@ function initAutocomplete() {
 
   if (clientInput && clientDropdown) {
     clientInput.addEventListener("focus", function () {
-      var profile = getSavedCustomerProfile();
-      if (profile && profile.name) {
+      var customers = getSavedCustomers();
+      if (customers.length > 0) {
         var filter = clientInput.value.trim().toLowerCase();
-        if (!filter || profile.name.toLowerCase().indexOf(filter) !== -1) {
-          showSuggestions(clientInput, "clientNameSuggestions", [
-            { label: profile.name, sub: profile.address || profile.email || "" }
-          ], function (item) {
-            applyCustomerSuggestion(profile);
+        var matches = [];
+        for (var i = 0; i < customers.length; i++) {
+          if (!filter || customers[i].name.toLowerCase().indexOf(filter) !== -1) {
+            matches.push({
+              label: customers[i].name,
+              sub: customers[i].address || customers[i].email || "",
+              profile: customers[i]
+            });
+          }
+        }
+        if (matches.length > 0) {
+          showSuggestions(clientInput, "clientNameSuggestions", matches, function (item) {
+            applyCustomerSuggestion(item.profile);
           });
         }
       }
     });
 
     clientInput.addEventListener("input", function () {
-      var profile = getSavedCustomerProfile();
-      if (profile && profile.name) {
+      var customers = getSavedCustomers();
+      if (customers.length > 0) {
         var filter = clientInput.value.trim().toLowerCase();
-        if (!filter || profile.name.toLowerCase().indexOf(filter) !== -1) {
-          showSuggestions(clientInput, "clientNameSuggestions", [
-            { label: profile.name, sub: profile.address || profile.email || "" }
-          ], function (item) {
-            applyCustomerSuggestion(profile);
+        var matches = [];
+        for (var i = 0; i < customers.length; i++) {
+          if (!filter || customers[i].name.toLowerCase().indexOf(filter) !== -1) {
+            matches.push({
+              label: customers[i].name,
+              sub: customers[i].address || customers[i].email || "",
+              profile: customers[i]
+            });
+          }
+        }
+        if (matches.length > 0) {
+          showSuggestions(clientInput, "clientNameSuggestions", matches, function (item) {
+            applyCustomerSuggestion(item.profile);
           });
         } else {
           clientDropdown.classList.remove("visible");
@@ -1450,15 +1620,34 @@ function initProfileForms() {
     profileRemoveLogoBtn.addEventListener("click", removeProfileCompanyLogo);
   }
 
-  // --- Bill To Customer Profile ---
+  // --- Bill To Customer Profiles ---
 
-  // Load saved customer profile
-  loadCustomerProfile();
+  // Load saved customers from localStorage and render the list
+  loadCustomers();
+  renderCustomersList();
 
-  // Save button
-  var saveCustomerBtn = document.getElementById("saveCustomerProfileBtn");
-  if (saveCustomerBtn) {
-    saveCustomerBtn.addEventListener("click", saveCustomerProfile);
+  // Add Customer button
+  var addCustomerBtn = document.getElementById("addCustomerBtn");
+  if (addCustomerBtn) {
+    addCustomerBtn.addEventListener("click", function () {
+      var nameInput = document.getElementById("profileClientName");
+      var addressInput = document.getElementById("profileClientAddress");
+      var emailInput = document.getElementById("profileClientEmail");
+      if (nameInput && addressInput && emailInput) {
+        addCustomer(nameInput.value, addressInput.value, emailInput.value);
+      }
+    });
+  }
+
+  // Delegate clicks on the customers table body for delete buttons
+  var customersTbody = document.getElementById("customersTableBody");
+  if (customersTbody) {
+    customersTbody.addEventListener("click", function (e) {
+      var target = e.target;
+      if (target.classList.contains("btn-delete-product") && target.dataset.customerId) {
+        deleteCustomer(target.dataset.customerId);
+      }
+    });
   }
 
   // --- Products Catalog ---
