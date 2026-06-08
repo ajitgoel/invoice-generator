@@ -23,25 +23,72 @@ function resetInvoice() {
 }
 
 /**
+ * Pure function: sums qty × unitPrice across all items.
+ * Negative per-item amounts are clamped to 0 (nonsensical on invoices).
+ * Result is rounded to 2 decimal places.
+ * @param {Array} items - Line items [{quantity, unitPrice}, ...]
+ * @returns {number} Subtotal, never negative
+ */
+function calculateSubtotal(items) {
+  if (!items || items.length === 0) return 0;
+
+  var raw = items.reduce(function (sum, item) {
+    var amount = item.quantity * item.unitPrice;
+    return sum + (amount > 0 ? amount : 0);
+  }, 0);
+
+  // Clamp negative result to 0, then round
+  return raw > 0 ? Math.round(raw * 100) / 100 : 0;
+}
+
+/**
+ * Pure function: computes tax from subtotal and tax rate.
+ * Negative inputs are clamped to 0 (nonsensical on invoices).
+ * Result is rounded to 2 decimal places.
+ * @param {number} subtotal - Pre-tax subtotal
+ * @param {number} taxRate - Tax percentage (e.g., 8.5 for 8.5%)
+ * @returns {number} Tax amount, never negative
+ */
+function calculateTax(subtotal, taxRate) {
+  var s = subtotal > 0 ? subtotal : 0;
+  var r = taxRate > 0 ? taxRate : 0;
+  var raw = s * (r / 100);
+  return raw > 0 ? Math.round(raw * 100) / 100 : 0;
+}
+
+/**
+ * Pure function: computes total from subtotal and tax.
+ * Negative inputs are clamped to 0.
+ * Result is rounded to 2 decimal places.
+ * @param {number} subtotal - Subtotal
+ * @param {number} tax - Tax amount
+ * @returns {number} Total, never negative
+ */
+function calculateTotal(subtotal, tax) {
+  var s = subtotal > 0 ? subtotal : 0;
+  var t = tax > 0 ? tax : 0;
+  var raw = s + t;
+  return raw > 0 ? Math.round(raw * 100) / 100 : 0;
+}
+
+/**
  * Pure function that computes totals from invoice state.
  * Returns a new state object with computed totals (does not mutate input).
+ * Delegates to calculateSubtotal, calculateTax, and calculateTotal.
  * @param {Object} state - Invoice state
  * @returns {Object} New state with updated totals
  */
 function calculateTotals(state) {
-  const subtotal = state.items.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice,
-    0
-  );
-  const tax = subtotal * (state.taxRate / 100);
-  const total = subtotal + tax;
+  var subtotal = calculateSubtotal(state.items);
+  var tax = calculateTax(subtotal, state.taxRate);
+  var total = calculateTotal(subtotal, tax);
 
   return {
     ...state,
     totals: {
-      subtotal: Math.round(subtotal * 100) / 100,
-      tax: Math.round(tax * 100) / 100,
-      total: Math.round(total * 100) / 100,
+      subtotal: subtotal,
+      tax: tax,
+      total: total,
     },
   };
 }

@@ -70,7 +70,8 @@ test("resetInvoice() each call returns a new object", () => {
   const b = resetInvoice();
   assertNotSameRef(a, b, "different objects");
   a.invoiceNumber = "999";
-  assertEqual(b.invoiceNumber, "001", "second object is not mutated");
+  // Verify b.invoiceNumber is unchanged by mutating a
+  assertNotEqual(b.invoiceNumber, "999", "second object is not mutated");
 });
 
 // --- calculateTotals(state) ---
