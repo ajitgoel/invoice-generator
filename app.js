@@ -709,18 +709,28 @@ function downloadPDF(element) {
   if (btnSpinner) btnSpinner.className = "";
   if (btn) btn.disabled = true;
 
-  // html2canvas has known issues with position:sticky — it clips content
-  // to the viewport-constrained height. Temporarily override to static
-  // with auto height so the full invoice renders, then restore.
-  var savedPosition = element.style.position;
-  var savedHeight = element.style.height;
-  var savedMaxHeight = element.style.maxHeight;
-  var savedOverflow = element.style.overflow;
+  // html2canvas cannot render sticky-positioned elements correctly — it
+  // captures only the viewport-constrained slice. We build a clean clone
+  // in a temporary offscreen container, capture that, then remove it.
+  // The clone is rendered at position:fixed (so html2canvas sees it),
+  // but covered by the loading spinner (z-index:9999).
+  var wrapper = document.createElement("div");
+  wrapper.style.cssText =
+    "position:fixed;left:0;top:0;width:800px;z-index:9998;background:#fff;" +
+    "padding:24px;";
 
-  element.style.position = "static";
-  element.style.height = "auto";
-  element.style.maxHeight = "none";
-  element.style.overflow = "visible";
+  var clone = element.cloneNode(true);
+  clone.style.position = "static";
+  clone.style.width = "100%";
+  clone.style.height = "auto";
+  clone.style.maxHeight = "none";
+  clone.style.overflow = "visible";
+
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  // Force layout so html2canvas reads the correct dimensions
+  wrapper.offsetHeight;
 
   var opt = {
     margin: 0.5,
@@ -731,10 +741,7 @@ function downloadPDF(element) {
   };
 
   function cleanup() {
-    element.style.position = savedPosition;
-    element.style.height = savedHeight;
-    element.style.maxHeight = savedMaxHeight;
-    element.style.overflow = savedOverflow;
+    if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
     if (btnText) btnText.style.display = "";
     if (btnSpinner) btnSpinner.className = "spinner-hidden";
     if (btn) btn.disabled = false;
@@ -742,7 +749,7 @@ function downloadPDF(element) {
 
   html2pdf()
     .set(opt)
-    .from(element)
+    .from(wrapper)
     .save()
     .then(cleanup)
     .catch(function () {
