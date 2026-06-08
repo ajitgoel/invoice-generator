@@ -30,7 +30,7 @@ h1 {
 /* Layout */
 .layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 3fr 2fr; /* 60% / 40% */
   gap: 24px;
   align-items: start;
 }
@@ -202,4 +202,156 @@ h1 {
   font-size: 0.875rem;
   border: 2px dashed #e5e7eb;
   border-radius: 8px;
+}
+
+/* ============================================================
+   Invoice Preview Document Styles
+   ============================================================ */
+
+.inv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.inv-company h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: #0f0f23;
+}
+
+.inv-company p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.inv-title {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.inv-title h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  color: #0f0f23;
+  letter-spacing: 0.05em;
+}
+
+.inv-title p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.inv-client {
+  margin-bottom: 24px;
+  padding: 12px 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.inv-client h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px 0;
+  color: #6b7280;
+}
+
+.inv-client p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+/* Line items table */
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  font-size: 0.8125rem;
+}
+
+.inv-table thead th {
+  text-align: left;
+  padding: 8px 8px;
+  border-bottom: 2px solid #d1d5db;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.inv-table thead th:last-child,
+.inv-table thead th:nth-child(2),
+.inv-table thead th:nth-child(3) {
+  text-align: right;
+}
+
+.inv-table tbody td {
+  padding: 8px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #1f2937;
+  vertical-align: top;
+}
+
+.inv-table tbody td:last-child,
+.inv-table tbody td:nth-child(2),
+.inv-table tbody td:nth-child(3) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Totals */
+.inv-totals {
+  margin-left: auto;
+  max-width: 220px;
+  margin-bottom: 16px;
+}
+
+.inv-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 0.8125rem;
+  color: #4b5563;
+}
+
+.inv-total-grand {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0f0f23;
+  border-top: 2px solid #0f0f23;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+/* Notes */
+.inv-notes {
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.inv-notes h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px 0;
+  color: #6b7280;
+}
+
+.inv-notes p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #4b5563;
+  font-style: italic;
 }
