@@ -820,3 +820,49 @@ h1 {
 .product-selector option.placeholder-option {
   color: hsl(220, 9%, 60%);
 }
+
+/* ============================================================
+   CSV Product Import
+   ============================================================ */
+
+.csv-format-hint {
+  font-size: 0.8125rem;
+  color: hsl(220, 9%, 46%);
+  margin: 0 0 12px 0;
+}
+
+.csv-format-hint strong {
+  font-weight: 600;
+  color: hsl(220, 20%, 14%);
+}
+
+.csv-import-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.csv-upload-btn {
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.csv-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.csv-file-name {
+  font-size: 0.8125rem;
+  color: hsl(220, 9%, 55%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

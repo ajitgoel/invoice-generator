@@ -255,6 +255,19 @@
           <span id="productErrorMsg" class="field-error" style="display:none"></span>
         </section>
 
+        <!-- Import Products from CSV -->
+        <section class="form-section">
+          <h2>Import Products from CSV</h2>
+          <p class="csv-format-hint">Format: CSV file with columns <strong>Description, Price</strong> (with or without headers).</p>
+          <div class="csv-import-row">
+            <label for="csvFileInput" class="btn btn-secondary csv-upload-btn">Choose CSV File</label>
+            <input type="file" id="csvFileInput" accept=".csv" class="csv-file-input">
+            <span id="csvImportFileName" class="csv-file-name"></span>
+          </div>
+          <span id="csvImportSuccessMsg" class="save-confirm" style="display:none"></span>
+          <span id="csvImportErrorMsg" class="field-error" style="display:none"></span>
+        </section>
+
         <!-- Products List -->
         <section class="form-section" style="border-bottom:none;padding-bottom:0;">
           <h2>Saved Products</h2>

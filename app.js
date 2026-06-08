@@ -1333,6 +1333,259 @@ function showProductError(msg) {
 }
 
 // ============================================================
+// CSV Product Import Module
+// ============================================================
+
+/**
+ * Handles CSV file selection from the file input.
+ * Reads the file as text and delegates to parseAndImportCSV.
+ * @param {File} file - The selected CSV file
+ */
+function handleCSVFile(file) {
+  if (!file) return;
+
+  // Validate file extension
+  if (!file.name.toLowerCase().endsWith(".csv")) {
+    showCSVImportError("Please select a .csv file.");
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var text = e.target.result;
+    parseAndImportCSV(text, file.name);
+  };
+  reader.onerror = function () {
+    showCSVImportError("Failed to read file. Please try again.");
+  };
+  reader.readAsText(file);
+}
+
+/**
+ * Parses CSV text, validates rows, and imports valid products.
+ * Pure parsing logic separated from file I/O for testability.
+ * @param {string} csvText - Raw CSV file content
+ * @param {string} [fileName] - Optional filename for messaging
+ * @returns {{ imported: number, skipped: number, errors: string[] }} Result summary
+ */
+function parseAndImportCSV(csvText, fileName) {
+  var result = { imported: 0, skipped: 0, errors: [] };
+
+  if (!csvText || csvText.trim() === "") {
+    showCSVImportError("The CSV file is empty.");
+    return result;
+  }
+
+  // Split by newline (handle \n, \r\n)
+  var lines = csvText.split(/\r?\n/);
+  if (lines.length === 0) {
+    showCSVImportError("The CSV file contains no rows.");
+    return result;
+  }
+
+  // Detect and skip header row
+  var startIndex = 0;
+  var firstLine = lines[0].trim();
+  if (firstLine) {
+    var firstFields = parseCSVLine(firstLine);
+    if (firstFields.length >= 2) {
+      var col0 = firstFields[0].toLowerCase().trim();
+      var col1 = firstFields[1].toLowerCase().trim();
+      // Detect header by common column names
+      if (
+        col0 === "description" ||
+        col0 === "name" ||
+        col0 === "product" ||
+        col0 === "item" ||
+        col1 === "price" ||
+        col1 === "unit price" ||
+        col1 === "unitprice" ||
+        col1 === "cost" ||
+        col1 === "amount" ||
+        col1 === "rate"
+      ) {
+        startIndex = 1;
+      }
+    }
+  }
+
+  var newProducts = [];
+
+  for (var i = startIndex; i < lines.length; i++) {
+    var line = lines[i].trim();
+    // Skip empty lines
+    if (line === "") continue;
+
+    var fields = parseCSVLine(line);
+
+    // Need at least description and price (2 columns)
+    if (fields.length < 2) {
+      result.skipped++;
+      continue;
+    }
+
+    var description = cleanCSVField(fields[0]);
+    var priceStr = cleanCSVField(fields[1]);
+    var price = parseFloat(priceStr);
+
+    // Validate
+    if (!description || description === "") {
+      result.skipped++;
+      continue;
+    }
+    if (isNaN(price) || price < 0) {
+      result.skipped++;
+      continue;
+    }
+
+    // Create product object
+    newProducts.push({
+      id: generateProductId(),
+      description: description,
+      unitPrice: Math.round(price * 100) / 100,
+    });
+  }
+
+  // Merge into _products array
+  if (newProducts.length > 0) {
+    for (var j = 0; j < newProducts.length; j++) {
+      _products.push(newProducts[j]);
+    }
+    saveProducts();
+    renderProductsList();
+    populateProductSelector();
+    result.imported = newProducts.length;
+    showCSVImportSuccess(result.imported, result.skipped);
+  } else if (result.skipped > 0) {
+    showCSVImportError(
+      "No valid products found. " +
+        result.skipped +
+        " row(s) were skipped due to invalid data."
+    );
+  } else {
+    showCSVImportError("No data rows found in the CSV file.");
+  }
+
+  return result;
+}
+
+/**
+ * Parses a single CSV line into an array of fields.
+ * Handles quoted fields containing commas.
+ * @param {string} line - A single line of CSV text
+ * @returns {string[]} Array of field values
+ */
+function parseCSVLine(line) {
+  var fields = [];
+  var current = "";
+  var inQuotes = false;
+
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+
+    if (inQuotes) {
+      if (ch === '"') {
+        // Double quote inside quotes escapes to a single quote
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++; // skip next char
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ",") {
+        fields.push(current);
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+  }
+  // Push the last field
+  fields.push(current);
+  return fields;
+}
+
+/**
+ * Cleans a CSV field value by trimming whitespace and stripping
+ * surrounding quotes.
+ * @param {string} field - Raw CSV field value
+ * @returns {string} Cleaned field value
+ */
+function cleanCSVField(field) {
+  if (typeof field !== "string") return "";
+  var cleaned = field.trim();
+  // Strip surrounding quotes if present
+  if (
+    cleaned.length >= 2 &&
+    cleaned[0] === '"' &&
+    cleaned[cleaned.length - 1] === '"'
+  ) {
+    cleaned = cleaned.substring(1, cleaned.length - 1);
+  }
+  return cleaned;
+}
+
+/**
+ * Displays a success message for the CSV import.
+ * @param {number} imported - Number of successfully imported products
+ * @param {number} skipped - Number of skipped rows
+ */
+function showCSVImportSuccess(imported, skipped) {
+  var successEl = document.getElementById("csvImportSuccessMsg");
+  var errorEl = document.getElementById("csvImportErrorMsg");
+  if (!successEl) return;
+
+  var msg = "Successfully imported " + imported + " product(s).";
+  if (skipped > 0) {
+    msg += " (" + skipped + " invalid row(s) skipped)";
+  }
+
+  if (errorEl) errorEl.style.display = "none";
+  successEl.textContent = msg;
+  successEl.style.display = "inline-block";
+  successEl.style.animation = "none";
+  successEl.offsetHeight;
+  successEl.style.animation = "";
+  // Auto-hide after 5 seconds (longer than add confirmation since more info)
+  setTimeout(function () {
+    successEl.style.display = "none";
+  }, 5000);
+}
+
+/**
+ * Displays an error message for the CSV import.
+ * @param {string} msg - Error message text
+ */
+function showCSVImportError(msg) {
+  var errorEl = document.getElementById("csvImportErrorMsg");
+  var successEl = document.getElementById("csvImportSuccessMsg");
+  if (!errorEl) return;
+
+  if (successEl) successEl.style.display = "none";
+  errorEl.textContent = msg;
+  errorEl.style.display = "inline-block";
+  errorEl.style.animation = "none";
+  errorEl.offsetHeight;
+  errorEl.style.animation = "";
+  // Auto-hide after 5 seconds
+  setTimeout(function () {
+    errorEl.style.opacity = "0";
+    errorEl.style.transition = "opacity 0.3s ease";
+    setTimeout(function () {
+      errorEl.style.display = "none";
+      errorEl.style.opacity = "1";
+      errorEl.style.transition = "";
+    }, 300);
+  }, 5000);
+}
+
+// ============================================================
 // Autocomplete & Suggestions Module
 // ============================================================
 
@@ -1779,6 +2032,23 @@ function initProfileForms() {
       var target = e.target;
       if (target.classList.contains("btn-delete-product") && target.dataset.productId) {
         deleteProduct(target.dataset.productId);
+      }
+    });
+  }
+
+  // CSV file input — import products on file selection
+  var csvFileInput = document.getElementById("csvFileInput");
+  if (csvFileInput) {
+    csvFileInput.addEventListener("change", function (e) {
+      if (e.target.files && e.target.files[0]) {
+        // Show selected filename
+        var fileNameEl = document.getElementById("csvImportFileName");
+        if (fileNameEl) {
+          fileNameEl.textContent = e.target.files[0].name;
+        }
+        handleCSVFile(e.target.files[0]);
+        // Reset file input so re-selecting the same file triggers change
+        e.target.value = "";
       }
     });
   }
