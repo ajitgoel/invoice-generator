@@ -4,6 +4,7 @@
   "description": "Client-side invoice generator",
   "main": "app.js",
   "scripts": {
+    "build": "bash scripts/build.sh",
     "test": "node test/run-tests.mjs",
     "typecheck": "node -e \"console.log('typecheck: no TypeScript files to check')\""
   },

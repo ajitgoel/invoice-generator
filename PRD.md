@@ -1,4 +1,6 @@
-# PRD: Invoice Generator
+# PRD: InvoiceCraft — Free Online Invoice Generator
+
+**Domain:** [invoicecraft.org](https://invoicecraft.org)
 
 ## Problem Statement
 
@@ -6,7 +8,7 @@ Freelancers, contractors, and small business owners need a quick, professional w
 
 ## Solution
 
-A single-page, zero-dependency invoice generator that runs entirely in the browser. Users fill in company details, client info, and line items — the invoice preview updates in real time. One click downloads a professional PDF. Session data persists in localStorage so partial work isn't lost. Monetized via Google AdSense.
+InvoiceCraft — a single-page, zero-dependency invoice generator that runs entirely in the browser. Users fill in company details, client info, and line items — the invoice preview updates in real time. One click downloads a professional PDF. Session data persists in localStorage so partial work isn't lost. Monetized via Google AdSense. Deployed for free on Cloudflare Pages at invoicecraft.org.
 
 ## User Stories
 
@@ -27,6 +29,9 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 14. As a site owner, I want Google AdSense ads displayed without degrading the user experience, so the site generates revenue.
 15. As a freelancer, I want a responsive layout that works on mobile, so I can create invoices from my phone.
 16. As a freelancer, I want to upload my company logo, so my branding appears on the invoice.
+17. As a visitor, I want to see the site's name and branding (logo + favicon) so I know I'm on a professional tool (InvoiceCraft).
+18. As a site owner, I want the site deployed on Cloudflare Pages with a custom domain (invoicecraft.org) so it's fast, free, and globally available.
+19. As a site owner, I want documentation for configuring AdSense and Google Analytics so I can set up monetization and tracking after launch.
 
 ### Profile Library & Saved Data Stories (Added in v1.1)
 
@@ -124,17 +129,18 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 
 ### Architecture
 
-- **Fully client-side static site**: No server, no database, no build step. Single HTML file (or HTML + CSS + JS files) served from Cloudflare Pages.
-- **No framework**: Vanilla HTML, CSS, and JavaScript. Zero npm dependencies at build time.
+- **Fully client-side static site**: No server, no database, no build step. Single HTML + CSS + JS served from Cloudflare Pages at invoicecraft.org.
+- **No framework**: Vanilla HTML, CSS, and JavaScript. Zero npm dependencies at runtime.
+- **Branding**: InvoiceCraft brand with SVG logo (`logo.svg`) and favicon (`favicon.svg`) in the site header. Document/invoice icon in brand blue (#2563eb) with wordmark and "Free Online Invoice Generator" tagline.
 - **html2pdf.js for PDF generation**: Loaded from CDN. Converts the invoice preview DOM node to PDF using html2canvas + jsPDF. To avoid height collapse and scroll position clipping, the target is statically cloned inside a temporary absolute-positioned wrapper at the top of the body, and html2canvas scroll offsets are reset (`scrollX: 0, scrollY: 0`).
 - **localStorage persistence**:
   - Invoice session state autosaves under `invoiceGeneratorState` on changes.
   - Saved company profile saved under `invoice_saved_company`.
   - Saved customer profiles list saved under `invoice_saved_customers` (JSON array of customer objects).
   - Saved products list saved under `invoice_saved_products` (JSON array).
-- **AdSense placement**: Single banner ad below the invoice generation area (after the "Download PDF" button). Non-intrusive, doesn't compete with form input space.
-- **Google Analytics Integration**: GA4 script loaded asynchronously from Google CDN using a measurement ID (configured via a placeholder or config constant at the top of the page).
-- **Landing Search Query Tracking**: JavaScript extracts search terms from the URL query parameters on load and fires custom events to GA4. No local database or dashboard UI is used.
+- **AdSense placement**: Single banner ad below the invoice generation area (after the preview panel, before the "Download PDF" button). Non-intrusive, doesn't compete with form input space. Hidden from printed/PDF output via `@media print { display: none !important }`.
+- **Google Analytics Integration**: GA4 script loaded asynchronously from Google CDN using a configurable measurement ID. Includes `trackLandingSearchQueries()` helper to parse URL query parameters (`q`, `query`, `utm_term`, `keyword`) and send `search_term_landing` custom events with referrer host.
+- **Cloudflare Pages Deployment**: Production build via `scripts/build.sh` copies public files to `dist/`. Security headers configured in `_headers`, custom domain set in `CNAME`. No server-side logic — purely static file serving.
 
 ### Major Modules
 
@@ -178,11 +184,12 @@ User Typing/Selecting Suggestion → state update → re-render preview → auto
 ### Visual Design
 
 - Clean, professional aesthetic inspired by Stripe's design language.
+- **Site header** with InvoiceCraft SVG logo centered above the tab navigation, with favicon for browser tabs.
 - Two-column layout on desktop: form on left, preview on right.
 - Single-column stacked layout on mobile.
 - System font stack, generous whitespace, subtle borders/shadows.
 - Print-friendly CSS for the preview panel.
-- AdSense banner ad below both columns, full width.
+- AdSense banner ad below both columns, full width, hidden in print.
 - **Tab Layout**:
   - Global navigation tab bar at the top with options: "Invoice Generator", "My Company", "Bill To Customer", "Products".
   - Sleek modern layout where the active tab is visually highlighted (using harmonized color scheme like custom HSL colors, no generic gray/blue).
@@ -213,7 +220,10 @@ User Typing/Selecting Suggestion → state update → re-render preview → auto
 
 ## Further Notes
 
-- Domain name selection and Cloudflare Pages setup will be handled separately before launch.
-- AdSense application and ad unit creation is a separate process after the site is live.
-- The project lives at `/Users/ajitgoel/simple-website/`.
+- Domain: invoicecraft.org registered; CNAME configured for Cloudflare Pages.
+- Cloudflare Pages deployment configured with `scripts/build.sh`, `_headers` (security headers), `_redirects`, and `CNAME` file. Output directory: `dist/`.
+- Deployment strategy: Git-based (connect Cloudflare Pages to `ajitgoel/invoice-generator` on GitHub) with build command `npm run build` and output directory `dist`.
+- AdSense and Google Analytics 4 configuration guide written at `docs/adsense-analytics-configuration.md` — includes step-by-step setup for publisher IDs, measurement IDs, ad units, and search term tracking.
+- AdSense application and ad unit creation is a separate process after the site is live. Placeholder IDs (`ca-pub-PLACEHOLDER`, `G-PLACEHOLDER`) are used during development.
+- The project lives at `/Users/ajitgoel/invoice-generator/`.
 - Development time target: under 1 hour for a single developer.

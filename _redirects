@@ -1,0 +1,2 @@
+# Redirect apex to www (or vice versa handled at DNS level)
+# No redirects needed — single-page application on single domain
