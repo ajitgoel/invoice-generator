@@ -14,6 +14,7 @@ mkdir -p dist/docs
 echo "  → Copying core application files..."
 cp index.html app.js styles.css dist/
 cp favicon.svg logo.svg dist/
+cp test-products.csv dist/
 
 # Cloudflare Pages config files
 echo "  → Copying Cloudflare config files..."

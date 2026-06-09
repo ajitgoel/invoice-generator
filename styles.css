@@ -884,6 +884,49 @@ h1 {
   white-space: nowrap;
 }
 
+.csv-template-link {
+  font-size: 0.8125rem;
+  color: hsl(220, 60%, 45%);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.csv-template-link:hover {
+  color: hsl(220, 60%, 35%);
+}
+
+/* ============================================================
+   Privacy Footer
+   ============================================================ */
+
+.privacy-footer {
+  margin-top: 40px;
+  padding: 16px 20px;
+  border-top: 1px solid hsl(220, 13%, 91%);
+  text-align: center;
+}
+
+.privacy-footer p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: hsl(220, 9%, 55%);
+  line-height: 1.6;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.privacy-footer a {
+  color: hsl(220, 60%, 45%);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.privacy-footer a:hover {
+  color: hsl(220, 60%, 35%);
+}
+
 /* ============================================================
    Print Styles
    ============================================================ */

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +9,10 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-PLACEHOLDER" crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8081762604519377"
+    crossorigin="anonymous"></script>
 </head>
+
 <body>
   <div class="container">
     <!-- Site Header with Logo -->
@@ -29,139 +32,137 @@
 
     <!-- Invoice Generator View -->
     <div id="view-invoice" class="view-container active">
-    <div class="layout">
-      <!-- Form Column -->
-      <div class="form-column">
-        <div class="card">
-          <!-- Invoice Info -->
-          <section class="form-section">
-            <h2>Invoice Info</h2>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="invoiceNumber">Invoice Number</label>
-                <input type="text" id="invoiceNumber" placeholder="001">
-              </div>
-              <div class="form-group">
-                <label for="invoiceDate">Date</label>
-                <input type="date" id="invoiceDate">
-              </div>
-            </div>
-          </section>
-
-          <!-- Company Details -->
-          <section class="form-section">
-            <h2>Your Company</h2>
-            <div class="form-group">
-              <label for="companyName">Company Name</label>
-              <div class="suggestion-wrapper">
-                <input type="text" id="companyName" placeholder="Acme Inc." autocomplete="off">
-                <ul class="suggestion-dropdown" id="companyNameSuggestions"></ul>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="companyAddress">Address</label>
-              <input type="text" id="companyAddress" placeholder="123 Business St, City, State ZIP">
-            </div>
-            <div class="form-group">
-              <label for="companyEmail">Email</label>
-              <input type="email" id="companyEmail" placeholder="billing@acme.com">
-            </div>
-            <div class="form-group">
-              <label>Company Logo</label>
-              <div class="logo-upload-area" id="logoUploadArea">
-                <img id="logoPreview" class="logo-thumb" src="" alt="Logo preview" style="display:none">
-                <div class="logo-upload-prompt">
-                  <label for="logoFileInput" class="btn btn-secondary logo-upload-btn">Choose Logo</label>
-                  <span class="logo-formats">PNG, JPG, or WebP</span>
+      <div class="layout">
+        <!-- Form Column -->
+        <div class="form-column">
+          <div class="card">
+            <!-- Invoice Info -->
+            <section class="form-section">
+              <h2>Invoice Info</h2>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="invoiceNumber">Invoice Number</label>
+                  <input type="text" id="invoiceNumber" placeholder="001">
                 </div>
-                <button type="button" id="removeLogoBtn" class="btn btn-remove-logo" style="display:none">Remove Logo</button>
-                <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/webp" class="logo-file-input">
+                <div class="form-group">
+                  <label for="invoiceDate">Date</label>
+                  <input type="date" id="invoiceDate">
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <!-- Client Details -->
-          <section class="form-section">
-            <h2>Bill To</h2>
-            <div class="form-group">
-              <label for="clientName">Client Name</label>
-              <div class="suggestion-wrapper">
-                <input type="text" id="clientName" placeholder="Client Company" autocomplete="off">
-                <ul class="suggestion-dropdown" id="clientNameSuggestions"></ul>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="clientAddress">Client Address</label>
-              <input type="text" id="clientAddress" placeholder="456 Client Ave, City, State ZIP">
-            </div>
-            <div class="form-group">
-              <label for="clientEmail">Client Email</label>
-              <input type="email" id="clientEmail" placeholder="accounts@client.com">
-            </div>
-          </section>
-
-          <!-- Line Items -->
-          <section class="form-section">
-            <h2>Line Items</h2>
-            <div id="itemsContainer">
-              <!-- Dynamically populated -->
-            </div>
-            <div class="product-selector-row">
-              <select id="productSelector" class="product-selector">
-                <option value="">— Select saved product —</option>
-              </select>
-              <button type="button" id="addItemBtn" class="btn btn-secondary">+ Blank Item</button>
-            </div>
-          </section>
-
-          <!-- Tax & Notes -->
-          <section class="form-section">
-            <div class="form-row">
+            <!-- Company Details -->
+            <section class="form-section">
+              <h2>Your Company</h2>
               <div class="form-group">
-                <label for="taxRate">Tax Rate (%)</label>
-                <input type="number" id="taxRate" value="0" min="0" max="100" step="0.01">
+                <label for="companyName">Company Name</label>
+                <div class="suggestion-wrapper">
+                  <input type="text" id="companyName" placeholder="Acme Inc." autocomplete="off">
+                  <ul class="suggestion-dropdown" id="companyNameSuggestions"></ul>
+                </div>
               </div>
-            </div>
-            <div class="form-group">
-              <label for="notes">Notes / Terms</label>
-              <textarea id="notes" rows="3" placeholder="Payment due within 30 days. Thank you for your business!"></textarea>
-            </div>
-          </section>
+              <div class="form-group">
+                <label for="companyAddress">Address</label>
+                <input type="text" id="companyAddress" placeholder="123 Business St, City, State ZIP">
+              </div>
+              <div class="form-group">
+                <label for="companyEmail">Email</label>
+                <input type="email" id="companyEmail" placeholder="billing@acme.com">
+              </div>
+              <div class="form-group">
+                <label>Company Logo</label>
+                <div class="logo-upload-area" id="logoUploadArea">
+                  <img id="logoPreview" class="logo-thumb" src="" alt="Logo preview" style="display:none">
+                  <div class="logo-upload-prompt">
+                    <label for="logoFileInput" class="btn btn-secondary logo-upload-btn">Choose Logo</label>
+                    <span class="logo-formats">PNG, JPG, or WebP</span>
+                  </div>
+                  <button type="button" id="removeLogoBtn" class="btn btn-remove-logo" style="display:none">Remove
+                    Logo</button>
+                  <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/webp"
+                    class="logo-file-input">
+                </div>
+              </div>
+            </section>
+
+            <!-- Client Details -->
+            <section class="form-section">
+              <h2>Bill To</h2>
+              <div class="form-group">
+                <label for="clientName">Client Name</label>
+                <div class="suggestion-wrapper">
+                  <input type="text" id="clientName" placeholder="Client Company" autocomplete="off">
+                  <ul class="suggestion-dropdown" id="clientNameSuggestions"></ul>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="clientAddress">Client Address</label>
+                <input type="text" id="clientAddress" placeholder="456 Client Ave, City, State ZIP">
+              </div>
+              <div class="form-group">
+                <label for="clientEmail">Client Email</label>
+                <input type="email" id="clientEmail" placeholder="accounts@client.com">
+              </div>
+            </section>
+
+            <!-- Line Items -->
+            <section class="form-section">
+              <h2>Line Items</h2>
+              <div id="itemsContainer">
+                <!-- Dynamically populated -->
+              </div>
+              <div class="product-selector-row">
+                <select id="productSelector" class="product-selector">
+                  <option value="">— Select saved product —</option>
+                </select>
+                <button type="button" id="addItemBtn" class="btn btn-secondary">+ Blank Item</button>
+              </div>
+            </section>
+
+            <!-- Tax & Notes -->
+            <section class="form-section">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="taxRate">Tax Rate (%)</label>
+                  <input type="number" id="taxRate" value="0" min="0" max="100" step="0.01">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="notes">Notes / Terms</label>
+                <textarea id="notes" rows="3"
+                  placeholder="Payment due within 30 days. Thank you for your business!"></textarea>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Preview Column -->
+        <div class="preview-column">
+          <div class="card preview-card" id="invoicePreview">
+            <!-- Dynamically populated -->
+          </div>
         </div>
       </div>
 
-      <!-- Preview Column -->
-      <div class="preview-column">
-        <div class="card preview-card" id="invoicePreview">
-          <!-- Dynamically populated -->
-        </div>
+      <!-- AdSense Banner -->
+      <div class="ad-container">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-PLACEHOLDER" data-ad-slot="1234567890"
+          data-ad-format="auto" data-ad-layout-key="-gw-3+1f-3d+2z" data-full-width-responsive="true"></ins>
+        <script>
+          (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
       </div>
-    </div>
 
-    <!-- AdSense Banner -->
-    <div class="ad-container">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-PLACEHOLDER"
-           data-ad-slot="1234567890"
-           data-ad-format="auto"
-           data-ad-layout-key="-gw-3+1f-3d+2z"
-           data-full-width-responsive="true"></ins>
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
-    </div>
-
-    <!-- Download PDF -->
-    <div class="download-section">
-      <button type="button" id="downloadPdfBtn" class="btn btn-primary">
-        <span id="downloadBtnText">Download PDF</span>
-        <span id="downloadBtnSpinner" class="spinner-hidden">
-          <span class="spinner"></span> Generating&hellip;
-        </span>
-      </button>
-      <button type="button" id="resetAllBtn" class="btn btn-reset">Reset All</button>
-    </div>
+      <!-- Download PDF -->
+      <div class="download-section">
+        <button type="button" id="downloadPdfBtn" class="btn btn-primary">
+          <span id="downloadBtnText">Download PDF</span>
+          <span id="downloadBtnSpinner" class="spinner-hidden">
+            <span class="spinner"></span> Generating&hellip;
+          </span>
+        </button>
+        <button type="button" id="resetAllBtn" class="btn btn-reset">Reset All</button>
+      </div>
     </div><!-- /#view-invoice -->
 
     <!-- My Company Profile View -->
@@ -190,8 +191,10 @@
                 <label for="profileCompanyLogoInput" class="btn btn-secondary logo-upload-btn">Choose Logo</label>
                 <span class="logo-formats">PNG, JPG, or WebP</span>
               </div>
-              <button type="button" id="profileCompanyRemoveLogoBtn" class="btn btn-remove-logo" style="display:none">Remove Logo</button>
-              <input type="file" id="profileCompanyLogoInput" accept="image/png,image/jpeg,image/webp" class="logo-file-input">
+              <button type="button" id="profileCompanyRemoveLogoBtn" class="btn btn-remove-logo"
+                style="display:none">Remove Logo</button>
+              <input type="file" id="profileCompanyLogoInput" accept="image/png,image/jpeg,image/webp"
+                class="logo-file-input">
             </div>
           </div>
         </section>
@@ -219,7 +222,8 @@
             <input type="email" id="profileClientEmail" placeholder="accounts@client.com">
           </div>
           <button type="button" id="addCustomerBtn" class="btn btn-primary">Add Customer</button>
-          <button type="button" id="cancelEditCustomerBtn" class="btn btn-secondary" style="display:none">Cancel</button>
+          <button type="button" id="cancelEditCustomerBtn" class="btn btn-secondary"
+            style="display:none">Cancel</button>
           <span id="customerAddedMsg" class="save-confirm" style="display:none">&#10003; Customer added</span>
           <span id="customerUpdatedMsg" class="save-confirm" style="display:none">&#10003; Customer updated</span>
           <span id="customerErrorMsg" class="field-error" style="display:none"></span>
@@ -275,7 +279,9 @@
         <!-- Import Products from CSV -->
         <section class="form-section">
           <h2>Import Products from CSV</h2>
-          <p class="csv-format-hint">Format: CSV file with columns <strong>Description, Price</strong> (with or without headers).</p>
+          <p class="csv-format-hint">Format: CSV file with columns <strong>Description, Price</strong> (with or without
+            headers). <a href="test-products.csv" download class="csv-template-link">Download sample CSV template</a> to
+            edit and re-upload.</p>
           <div class="csv-import-row">
             <label for="csvFileInput" class="btn btn-secondary csv-upload-btn">Choose CSV File</label>
             <input type="file" id="csvFileInput" accept=".csv" class="csv-file-input">
@@ -309,6 +315,15 @@
 
   </div>
 
+  <footer class="privacy-footer">
+    <p><strong>Privacy notice:</strong> This application does not store any of your information on a server. All data —
+      including company details, customer profiles, products, and invoice information — is stored entirely in your
+      browser using <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage" target="_blank"
+        rel="noopener">localStorage</a>. Nothing is ever uploaded to or stored on our servers. You can clear your data
+      at any time by clearing your browser's site data.</p>
+  </footer>
+
   <script src="app.js"></script>
 </body>
+
 </html>
