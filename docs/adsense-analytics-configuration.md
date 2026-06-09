@@ -44,8 +44,8 @@ InvoiceCraft uses Google AdSense to display ads and generate revenue. The ad uni
 Once approved:
 
 1. In AdSense, go to **Account** → **Settings** → **Account information**.
-2. Find your **Publisher ID** — it looks like `pub-1234567890123456`.
-3. The `ca-pub-` prefix version (e.g., `ca-pub-1234567890123456`) is what you'll use.
+2. Find your **Publisher ID** — it looks like `pub-8081762604519377`.
+3. The `ca-pub-` prefix version (e.g., `ca-pub-8081762604519377`) is what you'll use.
 
 ### 3. Create an Ad Unit
 
@@ -54,7 +54,21 @@ Once approved:
 3. Configure:
    - **Ad size**: Responsive
    - **Ad type**: Display ads (text & image)
-4. Copy the generated **Ad Slot ID** (e.g., `1234567890`) and the ad code snippet.
+4. Copy the generated **Ad Slot ID** (e.g., `5282039429`) and the ad code snippet.
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8081762604519377"
+     crossorigin="anonymous"></script>
+<!-- square-ad-unit -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8081762604519377"
+     data-ad-slot="5282039429"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
 
 ### 4. Configure the Application
 
