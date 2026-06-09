@@ -901,20 +901,21 @@ h1 {
    ============================================================ */
 
 .privacy-footer {
-  margin-top: 40px;
-  padding: 16px 20px;
+  max-width: 1200px;
+  margin: 40px auto 0 auto;
+  padding: 16px 16px;
   border-top: 1px solid hsl(220, 13%, 91%);
   text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .privacy-footer p {
-  margin: 0;
+  margin: 0 auto;
   font-size: 0.75rem;
   color: hsl(220, 9%, 55%);
   line-height: 1.6;
   max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
+  font-family: inherit;
 }
 
 .privacy-footer a {
