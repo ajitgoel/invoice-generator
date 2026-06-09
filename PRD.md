@@ -97,6 +97,29 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
 - [ ] Typecheck/lint passes.
 - [ ] Verify in browser using dev-browser skill.
 
+### Google AdSense & Search Term Analytics (Added in v1.2)
+
+#### US-023: Configure Google AdSense on the application
+**Description:** As a site owner, I want Google AdSense configured on the page so that I can generate revenue from visitor traffic without degrading the user experience.
+
+**Acceptance Criteria:**
+- [ ] AdSense placeholder block added to `index.html` (publisher ID and slot ID configured as easily-replaceable variables or central HTML markup placeholders).
+- [ ] Non-intrusive AdSense banner container placed below the invoice generator layout (after the "Download PDF" button) that displays ads when active.
+- [ ] Verify that AdSense scripts load asynchronously and do not block the page load or invoice generation logic.
+- [ ] Typecheck/lint passes.
+- [ ] Verify in browser using dev-browser skill.
+
+#### US-024: Track landing page search terms via Google Analytics
+**Description:** As a site owner, I want to track what search terms visitors specify before they come to the website using Google Analytics, so I can optimize SEO and content.
+
+**Acceptance Criteria:**
+- [ ] Google Analytics 4 (GA4) tag integrated asynchronously in `index.html` using a configurable Measurement ID.
+- [ ] Client-side JS script parses the landing page URL query parameters (specifically looking for `utm_term`, `q`, `query`, `keyword`) when the page loads.
+- [ ] If search terms are detected, log a custom event `search_term_landing` to Google Analytics 4 with the captured search term value.
+- [ ] Capture the `document.referrer` host if search terms are detected, sending it as custom parameter `referrer_host` to GA4.
+- [ ] Typecheck/lint passes.
+- [ ] Verify in browser using dev-browser skill.
+
 ## Implementation Decisions
 
 ### Architecture
@@ -110,6 +133,8 @@ A single-page, zero-dependency invoice generator that runs entirely in the brows
   - Saved customer profiles list saved under `invoice_saved_customers` (JSON array of customer objects).
   - Saved products list saved under `invoice_saved_products` (JSON array).
 - **AdSense placement**: Single banner ad below the invoice generation area (after the "Download PDF" button). Non-intrusive, doesn't compete with form input space.
+- **Google Analytics Integration**: GA4 script loaded asynchronously from Google CDN using a measurement ID (configured via a placeholder or config constant at the top of the page).
+- **Landing Search Query Tracking**: JavaScript extracts search terms from the URL query parameters on load and fires custom events to GA4. No local database or dashboard UI is used.
 
 ### Major Modules
 
@@ -184,6 +209,7 @@ User Typing/Selecting Suggestion → state update → re-render preview → auto
 - Time tracking
 - Expense tracking
 - Multiple saved company profiles (only a single saved company profile is supported)
+- Custom self-hosted analytics dashboard or in-app reports (all metrics/search terms are viewed in Google Analytics console)
 
 ## Further Notes
 

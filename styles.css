@@ -294,32 +294,24 @@ h1 {
   border-color: #9ca3af;
 }
 
-/* AdSense Banner */
-.adsense-banner {
-  width: 100%;
-  margin-top: 16px;
-  display: flex;
-  justify-content: center;
-}
-
-.adsense-placeholder {
+/* Ad Container (Google AdSense) */
+.ad-container {
   width: 100%;
   max-width: 728px;
+  margin: 24px auto 0 auto;
   min-height: 90px;
-  background: #f9fafb;
-  border: 2px dashed #d1d5db;
-  border-radius: 8px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  color: #9ca3af;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  align-items: center;
+}
+
+.ad-container ins.adsbygoogle {
+  display: block;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
-  .adsense-placeholder {
+  .ad-container {
     max-width: 100%;
     min-height: 60px;
   }
@@ -872,4 +864,14 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ============================================================
+   Print Styles
+   ============================================================ */
+
+@media print {
+  .ad-container {
+    display: none !important;
+  }
 }
